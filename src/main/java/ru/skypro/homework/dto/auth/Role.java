@@ -2,11 +2,14 @@ package ru.skypro.homework.dto.auth;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(description = "Роли пользователей в системе")
+@Schema(
+        name = "UserRole",
+        description = "Роли пользователей в системе",
+        type = "string",
+        enumAsRef = true,
+        allowableValues = {"USER", "ADMIN"}
+)
 public enum Role {
-    @Schema(description = "Обычный пользователь")
     USER,
-
-    @Schema(description = "Администратор системы")
     ADMIN
 }
