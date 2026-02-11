@@ -124,6 +124,7 @@
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
+                    <implicit>none</implicit>
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.projectlombok</groupId>

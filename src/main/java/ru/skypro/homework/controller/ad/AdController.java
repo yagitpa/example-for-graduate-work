@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import ru.skypro.homework.dto.ad.Ad;
+import ru.skypro.homework.dto.ad.AdDto;
 import ru.skypro.homework.dto.ad.Ads;
 import ru.skypro.homework.dto.ad.CreateOrUpdateAd;
 import ru.skypro.homework.dto.ad.ExtendedAd;
@@ -76,20 +76,20 @@ public class AdController {
                         content =
                                 @Content(
                                         mediaType = "application/json",
-                                        schema = @Schema(implementation = Ad.class))),
+                                        schema = @Schema(implementation = AdDto.class))),
                 @ApiResponse(
                         responseCode = "401",
                         description = "Пользователь не авторизован",
                         content = @Content)
             })
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Ad> addAd(
+    public ResponseEntity<AdDto> addAd(
             @RequestPart("properties") @Valid CreateOrUpdateAd properties,
             @RequestPart("image") MultipartFile image,
             Authentication authentication) {
         log.info("Запрос на создание объявления");
         // Заглушка
-        Ad ad = new Ad();
+        AdDto ad = new AdDto();
         return ResponseEntity.status(HttpStatus.CREATED).body(ad);
     }
 
@@ -162,7 +162,7 @@ public class AdController {
                         content =
                                 @Content(
                                         mediaType = "application/json",
-                                        schema = @Schema(implementation = Ad.class))),
+                                        schema = @Schema(implementation = AdDto.class))),
                 @ApiResponse(
                         responseCode = "401",
                         description = "Пользователь не авторизован",
@@ -177,13 +177,13 @@ public class AdController {
                         content = @Content)
             })
     @PatchMapping("/{id}")
-    public ResponseEntity<Ad> updateAd(
+    public ResponseEntity<AdDto> updateAd(
             @Parameter(description = "ID объявления") @PathVariable Integer id,
             @Valid @RequestBody CreateOrUpdateAd updateAd,
             Authentication authentication) {
         log.info("Запрос на обновление объявления с ID: {}", id);
         // Заглушка
-        Ad ad = new Ad();
+        AdDto ad = new AdDto();
         return ResponseEntity.ok(ad);
     }
 
