@@ -7,10 +7,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
@@ -22,10 +20,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import ru.skypro.homework.dto.comment.CommentDto;
-import ru.skypro.homework.dto.comment.Comments;
-import ru.skypro.homework.dto.comment.CreateOrUpdateComment;
+import ru.skypro.homework.dto.comment.CommentsDto;
+import ru.skypro.homework.dto.comment.CreateOrUpdateCommentDto;
 
 import javax.validation.Valid;
 
@@ -48,7 +45,7 @@ public class CommentController {
                         content =
                                 @Content(
                                         mediaType = "application/json",
-                                        schema = @Schema(implementation = Comments.class))),
+                                        schema = @Schema(implementation = CommentsDto.class))),
                 @ApiResponse(
                         responseCode = "401",
                         description = "Пользователь не авторизован",
@@ -59,13 +56,13 @@ public class CommentController {
                         content = @Content)
             })
     @GetMapping("/{adId}/comments")
-    public ResponseEntity<Comments> getComments(
+    public ResponseEntity<CommentsDto> getComments(
             @Parameter(description = "ID объявления") @PathVariable Integer adId) {
         log.info("Запрос комментариев для объявления с ID: {}", adId);
         // Заглушка
-        Comments comments = new Comments();
-        comments.setCount(0);
-        return ResponseEntity.ok(comments);
+        CommentsDto commentsDto = new CommentsDto();
+        commentsDto.setCount(0);
+        return ResponseEntity.ok(commentsDto);
     }
 
     @Operation(
@@ -92,7 +89,7 @@ public class CommentController {
     @PostMapping("/{adId}/comments")
     public ResponseEntity<CommentDto> addComment(
             @Parameter(description = "ID объявления") @PathVariable Integer adId,
-            @Valid @RequestBody CreateOrUpdateComment createComment,
+            @Valid @RequestBody CreateOrUpdateCommentDto createComment,
             Authentication authentication) {
         log.info("Запрос на добавление комментария к объявлению с ID: {}", adId);
         // Заглушка
@@ -158,7 +155,7 @@ public class CommentController {
     public ResponseEntity<CommentDto> updateComment(
             @Parameter(description = "ID объявления") @PathVariable Integer adId,
             @Parameter(description = "ID комментария") @PathVariable Integer commentId,
-            @Valid @RequestBody CreateOrUpdateComment updateComment,
+            @Valid @RequestBody CreateOrUpdateCommentDto updateComment,
             Authentication authentication) {
         log.info("Запрос на обновление комментария с ID {} в объявлении с ID: {}", commentId, adId);
         // Заглушка

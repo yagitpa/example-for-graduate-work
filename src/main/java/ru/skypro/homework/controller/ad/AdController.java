@@ -7,10 +7,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -27,11 +25,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
 import ru.skypro.homework.dto.ad.AdDto;
-import ru.skypro.homework.dto.ad.Ads;
-import ru.skypro.homework.dto.ad.CreateOrUpdateAd;
-import ru.skypro.homework.dto.ad.ExtendedAd;
+import ru.skypro.homework.dto.ad.AdsDto;
+import ru.skypro.homework.dto.ad.CreateOrUpdateAdDto;
+import ru.skypro.homework.dto.ad.ExtendedAdDto;
 
 import javax.validation.Valid;
 
@@ -54,15 +51,15 @@ public class AdController {
                         content =
                                 @Content(
                                         mediaType = "application/json",
-                                        schema = @Schema(implementation = Ads.class)))
+                                        schema = @Schema(implementation = AdsDto.class)))
             })
     @GetMapping
-    public ResponseEntity<Ads> getAllAds() {
+    public ResponseEntity<AdsDto> getAllAds() {
         log.info("Запрос на получение всех объявлений");
         // Заглушка
-        Ads ads = new Ads();
-        ads.setCount(0);
-        return ResponseEntity.ok(ads);
+        AdsDto adsDto = new AdsDto();
+        adsDto.setCount(0);
+        return ResponseEntity.ok(adsDto);
     }
 
     @Operation(
@@ -84,7 +81,7 @@ public class AdController {
             })
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<AdDto> addAd(
-            @RequestPart("properties") @Valid CreateOrUpdateAd properties,
+            @RequestPart("properties") @Valid CreateOrUpdateAdDto properties,
             @RequestPart("image") MultipartFile image,
             Authentication authentication) {
         log.info("Запрос на создание объявления");
@@ -104,7 +101,7 @@ public class AdController {
                         content =
                                 @Content(
                                         mediaType = "application/json",
-                                        schema = @Schema(implementation = ExtendedAd.class))),
+                                        schema = @Schema(implementation = ExtendedAdDto.class))),
                 @ApiResponse(
                         responseCode = "401",
                         description = "Пользователь не авторизован",
@@ -115,12 +112,12 @@ public class AdController {
                         content = @Content)
             })
     @GetMapping("/{id}")
-    public ResponseEntity<ExtendedAd> getAd(
+    public ResponseEntity<ExtendedAdDto> getAd(
             @Parameter(description = "ID объявления") @PathVariable Integer id) {
         log.info("Запрос информации об объявлении с ID: {}", id);
         // Заглушка
-        ExtendedAd extendedAd = new ExtendedAd();
-        return ResponseEntity.ok(extendedAd);
+        ExtendedAdDto extendedAdDto = new ExtendedAdDto();
+        return ResponseEntity.ok(extendedAdDto);
     }
 
     @Operation(summary = "Удаление объявления", description = "Удаляет объявление по ID")
@@ -179,7 +176,7 @@ public class AdController {
     @PatchMapping("/{id}")
     public ResponseEntity<AdDto> updateAd(
             @Parameter(description = "ID объявления") @PathVariable Integer id,
-            @Valid @RequestBody CreateOrUpdateAd updateAd,
+            @Valid @RequestBody CreateOrUpdateAdDto updateAd,
             Authentication authentication) {
         log.info("Запрос на обновление объявления с ID: {}", id);
         // Заглушка
@@ -198,19 +195,19 @@ public class AdController {
                         content =
                                 @Content(
                                         mediaType = "application/json",
-                                        schema = @Schema(implementation = Ads.class))),
+                                        schema = @Schema(implementation = AdsDto.class))),
                 @ApiResponse(
                         responseCode = "401",
                         description = "Пользователь не авторизован",
                         content = @Content)
             })
     @GetMapping("/me")
-    public ResponseEntity<Ads> getAdsMe(Authentication authentication) {
+    public ResponseEntity<AdsDto> getAdsMe(Authentication authentication) {
         log.info("Запрос на получение объявлений текущего пользователя");
         // Заглушка
-        Ads ads = new Ads();
-        ads.setCount(0);
-        return ResponseEntity.ok(ads);
+        AdsDto adsDto = new AdsDto();
+        adsDto.setCount(0);
+        return ResponseEntity.ok(adsDto);
     }
 
     @Operation(

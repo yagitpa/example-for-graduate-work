@@ -1,7 +1,6 @@
 package ru.skypro.homework.dto.ad;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import lombok.Data;
 
 import javax.validation.constraints.Max;
@@ -11,7 +10,7 @@ import javax.validation.constraints.Size;
 
 @Data
 @Schema(description = "DTO для создания или обновления объявления")
-public class CreateOrUpdateAd {
+public class CreateOrUpdateAdDto {
 
     @Schema(
             description = "Заголовок объявления",

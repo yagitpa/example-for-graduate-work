@@ -5,10 +5,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -16,9 +14,8 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import ru.skypro.homework.dto.auth.Login;
-import ru.skypro.homework.dto.auth.Register;
+import ru.skypro.homework.dto.auth.LoginDto;
+import ru.skypro.homework.dto.auth.RegisterDto;
 import ru.skypro.homework.service.AuthService;
 
 import javax.validation.Valid;
@@ -51,15 +48,15 @@ public class AuthController {
                         description = "Неверные учетные данные (логин или пароль)",
                         content = @Content)
             })
-    @PostMapping("/login")
-    public ResponseEntity<Void> login(@Valid @RequestBody Login login) {
-        log.info("Запрос на авторизацию пользователя: {}", login.getUsername());
+    @PostMapping("/loginDto")
+    public ResponseEntity<Void> login(@Valid @RequestBody LoginDto loginDto) {
+        log.info("Запрос на авторизацию пользователя: {}", loginDto.getUsername());
 
-        if (authService.login(login.getUsername(), login.getPassword())) {
-            log.info("Пользователь {} успешно авторизован", login.getUsername());
+        if (authService.login(loginDto.getUsername(), loginDto.getPassword())) {
+            log.info("Пользователь {} успешно авторизован", loginDto.getUsername());
             return ResponseEntity.ok().build();
         } else {
-            log.warn("Неудачная попытка авторизации для пользователя: {}", login.getUsername());
+            log.warn("Неудачная попытка авторизации для пользователя: {}", loginDto.getUsername());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
@@ -79,18 +76,18 @@ public class AuthController {
                                 "Некорректные данные запроса (ошибка валидации или пользователь уже существует)",
                         content = @Content)
             })
-    @PostMapping("/register")
-    public ResponseEntity<Void> register(@Valid @RequestBody Register register) {
+    @PostMapping("/registerDto")
+    public ResponseEntity<Void> register(@Valid @RequestBody RegisterDto registerDto) {
         log.info(
                 "Запрос на регистрацию пользователя: {} {}",
-                register.getFirstName(),
-                register.getLastName());
+                registerDto.getFirstName(),
+                registerDto.getLastName());
 
-        if (authService.register(register)) {
-            log.info("Пользователь {} успешно зарегистрирован", register.getUsername());
+        if (authService.register(registerDto)) {
+            log.info("Пользователь {} успешно зарегистрирован", registerDto.getUsername());
             return ResponseEntity.status(HttpStatus.CREATED).build();
         } else {
-            log.warn("Неудачная попытка регистрации пользователя: {}", register.getUsername());
+            log.warn("Неудачная попытка регистрации пользователя: {}", registerDto.getUsername());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }

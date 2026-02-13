@@ -24,7 +24,7 @@ import java.util.List;
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Ad {
+public class AdsDao {
 
     public static final int MAX_TITLE_LENGTH = 100;
     public static final int MAX_IMAGE_PATH_LENGTH = 512;
@@ -47,8 +47,8 @@ public class Ad {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User author;
+    private UsersDao author;
 
-    @OneToMany(mappedBy = "ad", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Comment> comments = new ArrayList<>();
+    @OneToMany(mappedBy = "adsDao", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<CommentsDao> commentsDaos = new ArrayList<>();
 }

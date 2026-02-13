@@ -15,7 +15,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NewPassword'
+              $ref: '#/components/schemas/NewPasswordDto'
       responses:
         '200':
           description: OK
@@ -34,7 +34,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/UsersDao'
           description: OK
         '401':
           description: Unauthorized
@@ -47,14 +47,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateUser'
+              $ref: '#/components/schemas/UpdateUserDto'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UpdateUser'
+                $ref: '#/components/schemas/UpdateUserDto'
         '401':
           description: Unauthorized
   /users/me/image:
@@ -90,7 +90,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Register'
+              $ref: '#/components/schemas/RegisterDto'
       responses:
         '201':
           description: Created
@@ -106,7 +106,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Login'
+              $ref: '#/components/schemas/LoginDto'
       responses:
         '200':
           description: OK
@@ -124,7 +124,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Ads'
+                $ref: '#/components/schemas/AdsDto'
     post:
       tags:
         - Объявления
@@ -140,7 +140,7 @@ paths:
               type: object
               properties:
                 properties:
-                  $ref: '#/components/schemas/CreateOrUpdateAd'
+                  $ref: '#/components/schemas/CreateOrUpdateAdDto'
                 image:
                   type: string
                   format: binary
@@ -158,7 +158,7 @@ paths:
       tags:
         - Комментарии
       summary: 'Получение комментариев объявления'
-      operationId: getComments
+      operationId: getCommentsDaos
       parameters:
         - name: id
           in: path
@@ -172,7 +172,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Comments'
+                $ref: '#/components/schemas/CommentsDto'
         '401':
           description: Unauthorized
         '404':
@@ -194,7 +194,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateOrUpdateComment'
+              $ref: '#/components/schemas/CreateOrUpdateCommentDto'
       responses:
         '200':
           description: OK
@@ -212,7 +212,7 @@ paths:
       tags:
         - Объявления
       summary: 'Получение информации об объявлении'
-      operationId: getAds
+      operationId: getAdsDaos
       parameters:
         - name: id
           in: path
@@ -226,7 +226,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ExtendedAd'
+                $ref: '#/components/schemas/ExtendedAdDto'
         '401':
           description: Unauthorized
         '404':
@@ -268,7 +268,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateOrUpdateAd'
+              $ref: '#/components/schemas/CreateOrUpdateAdDto'
       responses:
         '200':
           description: OK
@@ -332,7 +332,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateOrUpdateComment'
+              $ref: '#/components/schemas/CreateOrUpdateCommentDto'
       responses:
         '200':
           description: OK
@@ -358,7 +358,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Ads'
+                $ref: '#/components/schemas/AdsDto'
           description: OK
         '401':
           description: Unauthorized

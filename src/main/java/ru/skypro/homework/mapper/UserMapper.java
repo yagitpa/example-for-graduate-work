@@ -6,23 +6,23 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import ru.skypro.homework.config.MapStructConfig;
-import ru.skypro.homework.dto.auth.Register;
-import ru.skypro.homework.dto.user.UpdateUser;
+import ru.skypro.homework.dto.auth.RegisterDto;
+import ru.skypro.homework.dto.user.UpdateUserDto;
 import ru.skypro.homework.dto.user.UserDto;
-import ru.skypro.homework.model.User;
+import ru.skypro.homework.model.UsersDao;
 
 @Mapper(config = MapStructConfig.class)
 public interface UserMapper {
 
-    UserDto toUserDto(User entity);
+    UserDto toUserDto(UsersDao entity);
 
     @Mapping(source = "username", target = "email")
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "image", ignore = true)
     @Mapping(target = "ads", ignore = true)
     @Mapping(target = "comments", ignore = true)
-    User toUserEntity(Register registerDto);
+    UsersDao toUserEntity(RegisterDto registerDto);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateUserFromDto(UpdateUser dto, @MappingTarget User entity);
+    void updateUserFromDto(UpdateUserDto dto, @MappingTarget UsersDao entity);
 }

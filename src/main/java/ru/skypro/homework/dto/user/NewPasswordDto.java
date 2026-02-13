@@ -1,7 +1,6 @@
 package ru.skypro.homework.dto.user;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
@@ -9,7 +8,7 @@ import javax.validation.constraints.Size;
 
 @Data
 @Schema(description = "DTO для смены пароля пользователя")
-public class NewPassword {
+public class NewPasswordDto {
 
     @Schema(
             description = "Текущий пароль",
