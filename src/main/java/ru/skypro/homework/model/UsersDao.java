@@ -25,7 +25,7 @@ import java.util.List;
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public class UsersDao {
 
     public static final int MAX_EMAIL_LENGTH = 254;
     public static final int MAX_FIRSTNAME_LENGTH = 50;
@@ -61,8 +61,8 @@ public class User {
     private String image;
 
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Ad> ads = new ArrayList<>();
+    private List<AdsDao> adsDaos = new ArrayList<>();
 
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Comment> comments = new ArrayList<>();
+    private List<CommentsDao> commentsDaos = new ArrayList<>();
 }

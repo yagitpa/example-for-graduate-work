@@ -1,7 +1,6 @@
 package ru.skypro.homework.dto.user;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
@@ -10,7 +9,7 @@ import javax.validation.constraints.Size;
 
 @Data
 @Schema(description = "DTO для обновления информации о пользователе")
-public class UpdateUser {
+public class UpdateUserDto {
 
     @Schema(description = "Имя пользователя", minLength = 3, maxLength = 10, example = "Иван")
     @NotBlank(message = "Имя не может быть пустым")

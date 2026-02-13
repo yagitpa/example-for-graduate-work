@@ -1,7 +1,6 @@
 package ru.skypro.homework.dto.auth;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
@@ -10,7 +9,7 @@ import javax.validation.constraints.Size;
 
 @Data
 @Schema(description = "DTO для регистрации пользователя")
-public class Register {
+public class RegisterDto {
 
     @Schema(description = "Логин пользователя", minLength = 4, maxLength = 32, example = "user123")
     @NotBlank(message = "Логин не может быть пустым")

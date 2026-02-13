@@ -8,8 +8,8 @@ import org.mapstruct.Named;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import ru.skypro.homework.config.MapStructConfig;
 import ru.skypro.homework.dto.comment.CommentDto;
-import ru.skypro.homework.dto.comment.CreateOrUpdateComment;
-import ru.skypro.homework.model.Comment;
+import ru.skypro.homework.dto.comment.CreateOrUpdateCommentDto;
+import ru.skypro.homework.model.CommentsDao;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -22,20 +22,20 @@ public interface CommentMapper {
     @Mapping(source = "author.image", target = "authorImage")
     @Mapping(source = "author.firstName", target = "authorFirstName")
     @Mapping(source = "createdAt", target = "createdAt", qualifiedByName = "localDateTimeToEpochMillis")
-    CommentDto toCommentDto(Comment entity);
+    CommentDto toCommentDto(CommentsDao entity);
 
     @Mapping(target = "pk", ignore = true)
     @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "author", ignore = true)
     @Mapping(target = "ad", ignore = true)
-    Comment toCommentEntity(CreateOrUpdateComment dto);
+    CommentsDao toCommentEntity(CreateOrUpdateCommentDto dto);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "pk", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "author", ignore = true)
     @Mapping(target = "ad", ignore = true)
-    void updateCommentFromDto(CreateOrUpdateComment dto, @MappingTarget Comment entity);
+    void updateCommentFromDto(CreateOrUpdateCommentDto dto, @MappingTarget CommentsDao entity);
 
     // ========== Вспомогательный метод: LocalDateTime → Long (epoch millis) ==========
     @Named("localDateTimeToEpochMillis")
