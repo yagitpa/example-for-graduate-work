@@ -1,10 +1,15 @@
 package ru.skypro.homework.service;
 
+import lombok.Data;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import ru.skypro.homework.util.ImageHelper;
+import ru.skypro.homework.exception.ImageNotFoundException;
+import ru.skypro.homework.exception.ImageReadException;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -12,13 +17,25 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 
-/**
- * Сервис для работы с изображениями: сохранение, удаление, чтение
- */
+@Getter
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ImageService {
+
+    @Value("${app.image.avatar-dir}")
+    private String avatarDir;
+
+    @Value("${app.image.ad-dir}")
+    private String adImageDir;
+
+    public ImageData loadAdImage(String filename) {
+        return loadImage(filename, adImageDir);
+    }
+
+    public ImageData loadAvatar(String filename) {
+        return loadImage(filename, avatarDir);
+    }
 
     /**
      * Сохраняет файл в указанную директорию.
@@ -30,7 +47,7 @@ public class ImageService {
      */
     public String saveImage(MultipartFile image, String directory, String urlPrefix) {
         try {
-            String extension = ImageHelper.getExtension(image.getOriginalFilename());
+            String extension = getExtension(image.getOriginalFilename());
             String filename = UUID.randomUUID() + extension;
             Path uploadPath = Paths.get(directory);
             if (!Files.exists(uploadPath)) {
@@ -76,5 +93,47 @@ public class ImageService {
             log.error("Failed to read image file: {}", imagePath, e);
             throw new RuntimeException("Failed to read image file", e);
         }
+    }
+
+    /**
+     * Загружает изображение из указанной директории.
+     *
+     * @param filename  имя файла
+     * @param directory директория (avatarDir или adImageDir)
+     * @return объект {@link ImageData} с содержимым и MIME-типом, или null если файл не найден
+     * @throws ImageNotFoundException исключение при ошибке "изображение не найдено"
+     * @throws ImageReadException исключение при ошибке чтения изображения
+     */
+    private ImageData loadImage(String filename, String directory) {
+        try {
+            Path path = Paths.get(directory, filename);
+            if (!Files.exists(path)) {
+                throw new ImageNotFoundException("Image not found: " + filename);
+            }
+            byte[] content = Files.readAllBytes(path);
+            String contentType = Files.probeContentType(path);
+            if (contentType == null) {
+                contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
+            }
+            return new ImageData(content, contentType);
+        } catch (IOException e) {
+            throw new ImageReadException("Failed to read image: " + filename, e);
+        }
+    }
+
+    private String getExtension(String filename) {
+        if (filename == null || !filename.contains(".")) {
+            return "";
+        }
+        return filename.substring(filename.lastIndexOf("."));
+    }
+
+    /**
+     * Вспомогательный класс для передачи данных изображения.
+     */
+    @Data
+    public static class ImageData {
+        private final byte[] content;
+        private final String contentType;
     }
 }
