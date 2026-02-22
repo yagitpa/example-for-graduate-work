@@ -4,28 +4,30 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
 import ru.skypro.homework.constants.ExceptionMessages;
 import ru.skypro.homework.exception.ImageNotFoundException;
 import ru.skypro.homework.exception.ImageReadException;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 
+import javax.annotation.PostConstruct;
+
 /**
- * Сервис для работы с изображениями.
- * Обеспечивает сохранение, удаление, чтение файлов изображений,
+ * Сервис для работы с изображениями. Обеспечивает сохранение, удаление, чтение файлов изображений,
  * а также загрузку их с определением MIME-типа.
- * <p>
- * При ошибках ввода-вывода выбрасывает {@link ImageReadException},
- * при отсутствии файла – {@link ImageNotFoundException}.
+ *
+ * <p>При ошибках ввода-вывода выбрасывает {@link ImageReadException}, при отсутствии файла – {@link
+ * ImageNotFoundException}.
  */
 @Getter
 @Slf4j
@@ -56,7 +58,7 @@ public class ImageService {
     /**
      * Сохраняет файл в указанную директорию.
      *
-     * @param image     загружаемый файл
+     * @param image загружаемый файл
      * @param directory корневая директория для сохранения (например, "./avatars")
      * @param urlPrefix префикс URL для доступа (например, "/avatars/")
      * @return относительный путь к файлу (например, "/avatars/file.jpg")
@@ -107,14 +109,15 @@ public class ImageService {
             return Files.readAllBytes(fullPath);
         } catch (IOException e) {
             log.error("Failed to read image file: {}", imagePath, e);
-            throw new RuntimeException(String.format(ExceptionMessages.IMAGE_FAILED_TO_READ, imagePath), e);
+            throw new RuntimeException(
+                    String.format(ExceptionMessages.IMAGE_FAILED_TO_READ, imagePath), e);
         }
     }
 
     /**
      * Загружает изображение из указанной директории.
      *
-     * @param filename  имя файла
+     * @param filename имя файла
      * @param directory директория (avatarDir или adImageDir)
      * @return объект {@link ImageData} с содержимым и MIME-типом, или null если файл не найден
      * @throws ImageNotFoundException исключение при ошибке "изображение не найдено"
@@ -124,7 +127,8 @@ public class ImageService {
         try {
             Path path = Paths.get(directory, filename);
             if (!Files.exists(path)) {
-                throw new ImageNotFoundException(String.format(ExceptionMessages.IMAGE_NOT_FOUND, filename));
+                throw new ImageNotFoundException(
+                        String.format(ExceptionMessages.IMAGE_NOT_FOUND, filename));
             }
             byte[] content = Files.readAllBytes(path);
             String contentType = Files.probeContentType(path);
@@ -133,7 +137,8 @@ public class ImageService {
             }
             return new ImageData(content, contentType);
         } catch (IOException e) {
-            throw new ImageReadException(String.format(ExceptionMessages.IMAGE_FAILED_TO_READ, filename), e);
+            throw new ImageReadException(
+                    String.format(ExceptionMessages.IMAGE_FAILED_TO_READ, filename), e);
         }
     }
 
@@ -156,9 +161,7 @@ public class ImageService {
         }
     }
 
-    /**
-     * Вспомогательный класс для передачи данных изображения.
-     */
+    /** Вспомогательный класс для передачи данных изображения. */
     @Data
     public static class ImageData {
         private final byte[] content;

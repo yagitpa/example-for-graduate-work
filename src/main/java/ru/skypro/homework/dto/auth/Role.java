@@ -7,8 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
         description = "Роли пользователей в системе",
         type = "string",
         enumAsRef = true,
-        allowableValues = {"USER", "ADMIN"}
-)
+        allowableValues = {"USER", "ADMIN"})
 public enum Role {
     USER,
     ADMIN

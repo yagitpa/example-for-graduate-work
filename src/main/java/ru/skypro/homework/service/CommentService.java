@@ -5,8 +5,8 @@ import ru.skypro.homework.dto.comment.CommentsDto;
 import ru.skypro.homework.dto.comment.CreateOrUpdateCommentDto;
 
 /**
- * Сервис для работы с комментариями к объявлениям.
- * Содержит методы для получения, добавления, обновления и удаления комментариев.
+ * Сервис для работы с комментариями к объявлениям. Содержит методы для получения, добавления,
+ * обновления и удаления комментариев.
  */
 public interface CommentService {
 
@@ -43,5 +43,6 @@ public interface CommentService {
      * @param updateComment новые данные комментария
      * @return обновлённый комментарий
      */
-    CommentDto updateComment(Integer adId, Integer commentId, CreateOrUpdateCommentDto updateComment);
+    CommentDto updateComment(
+            Integer adId, Integer commentId, CreateOrUpdateCommentDto updateComment);
 }

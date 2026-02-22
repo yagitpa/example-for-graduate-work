@@ -2,10 +2,12 @@ package ru.skypro.homework.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
 import ru.skypro.homework.constants.ExceptionMessages;
 import ru.skypro.homework.constants.UrlPrefixConstants;
 import ru.skypro.homework.dto.ad.AdDto;
@@ -27,9 +29,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Реализация сервиса {@link AdService}.
- * Обеспечивает CRUD-операции с объявлениями, проверку прав доступа
- * (автор или администратор) и управление изображениями через {@link ImageService}.
+ * Реализация сервиса {@link AdService}. Обеспечивает CRUD-операции с объявлениями, проверку прав
+ * доступа (автор или администратор) и управление изображениями через {@link ImageService}.
  *
  * @see AdService
  * @see AdRepository
@@ -56,9 +57,7 @@ public class AdServiceImpl implements AdService {
     @Transactional(readOnly = true)
     public AdsDto getAllAds() {
         List<AdsDao> ads = adRepository.findAll();
-        List<AdDto> adDtos = ads.stream()
-                                .map(adMapper::toAdDto)
-                                .collect(Collectors.toList());
+        List<AdDto> adDtos = ads.stream().map(adMapper::toAdDto).collect(Collectors.toList());
         AdsDto result = new AdsDto();
         result.setCount(adDtos.size());
         result.setResults(adDtos);
@@ -68,7 +67,8 @@ public class AdServiceImpl implements AdService {
     @Override
     public AdDto addAd(String email, CreateOrUpdateAdDto properties, MultipartFile image) {
         UsersDao author = currentUserService.getUserByEmail(email);
-        String imagePath = imageService.saveImage(image, adImageDir, UrlPrefixConstants.URL_PREFIX_ADS_IMAGES);
+        String imagePath =
+                imageService.saveImage(image, adImageDir, UrlPrefixConstants.URL_PREFIX_ADS_IMAGES);
 
         AdsDao ad = adMapper.toAdEntity(properties);
         ad.setAuthor(author);
@@ -113,9 +113,7 @@ public class AdServiceImpl implements AdService {
     public AdsDto getAdsMe() {
         UsersDao author = currentUserService.getCurrentUser(); // получаем текущего пользователя
         List<AdsDao> ads = adRepository.findByAuthorId(author.getId());
-        List<AdDto> adDtos = ads.stream()
-                                .map(adMapper::toAdDto)
-                                .collect(Collectors.toList());
+        List<AdDto> adDtos = ads.stream().map(adMapper::toAdDto).collect(Collectors.toList());
         AdsDto result = new AdsDto();
         result.setCount(adDtos.size());
         result.setResults(adDtos);
@@ -127,7 +125,8 @@ public class AdServiceImpl implements AdService {
         AdsDao ad = getAdById(id);
         checkPermissions(ad, email);
 
-        String newImagePath = imageService.saveImage(image, adImageDir, UrlPrefixConstants.URL_PREFIX_ADS_IMAGES);
+        String newImagePath =
+                imageService.saveImage(image, adImageDir, UrlPrefixConstants.URL_PREFIX_ADS_IMAGES);
         if (ad.getImage() != null) {
             imageService.deleteImage(ad.getImage(), adImageDir);
         }
@@ -140,8 +139,12 @@ public class AdServiceImpl implements AdService {
     }
 
     private AdsDao getAdById(Integer id) {
-        return adRepository.findById(id)
-                           .orElseThrow(() -> new AdNotFoundException(String.format(ExceptionMessages.AD_NOT_FOUND, id)));
+        return adRepository
+                .findById(id)
+                .orElseThrow(
+                        () ->
+                                new AdNotFoundException(
+                                        String.format(ExceptionMessages.AD_NOT_FOUND, id)));
     }
 
     private void checkPermissions(AdsDao ad, String email) {
@@ -149,7 +152,8 @@ public class AdServiceImpl implements AdService {
         boolean isAuthor = ad.getAuthor().getId().equals(user.getId());
         boolean isAdmin = user.getRole() == Role.ADMIN;
         if (!isAuthor && !isAdmin) {
-            throw new UnauthorizedAccessException(String.format(ExceptionMessages.UNAUTHORIZED_ACCESS, "ad"));
+            throw new UnauthorizedAccessException(
+                    String.format(ExceptionMessages.UNAUTHORIZED_ACCESS, "ad"));
         }
     }
 }

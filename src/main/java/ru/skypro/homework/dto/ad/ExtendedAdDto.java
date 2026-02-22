@@ -1,9 +1,10 @@
 package ru.skypro.homework.dto.ad;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
-
 import static ru.skypro.homework.constants.ValidationConstants.PHONE_EXAMPLE;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+
+import lombok.Data;
 
 @Data
 @Schema(description = "Расширенная информация об объявлении")

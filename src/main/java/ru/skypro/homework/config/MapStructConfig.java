@@ -3,9 +3,5 @@ package ru.skypro.homework.config;
 import org.mapstruct.MapperConfig;
 import org.mapstruct.ReportingPolicy;
 
-@MapperConfig(
-        componentModel = "spring",
-        unmappedTargetPolicy = ReportingPolicy.IGNORE
-)
-public interface MapStructConfig {
-}
+@MapperConfig(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
+public interface MapStructConfig {}

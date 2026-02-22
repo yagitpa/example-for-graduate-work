@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
 import ru.skypro.homework.model.AdsDao;
 
 import java.util.List;
@@ -29,8 +30,7 @@ public interface AdRepository extends JpaRepository<AdsDao, Integer> {
     List<AdsDao> findByAuthorId(Integer authorId);
 
     /**
-     * Подсчёт количества объявлений пользователя.
-     * Может быть полезен для сервисного слоя.
+     * Подсчёт количества объявлений пользователя. Может быть полезен для сервисного слоя.
      *
      * @param authorId идентификатор автора
      * @return количество объявлений

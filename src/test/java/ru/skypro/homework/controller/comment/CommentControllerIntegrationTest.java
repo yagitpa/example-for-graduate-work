@@ -1,5 +1,7 @@
 package ru.skypro.homework.controller.comment;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,32 +11,28 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import ru.skypro.homework.AbstractIntegrationTest;
+import ru.skypro.homework.dto.auth.Role;
 import ru.skypro.homework.dto.comment.CommentDto;
 import ru.skypro.homework.dto.comment.CommentsDto;
 import ru.skypro.homework.dto.comment.CreateOrUpdateCommentDto;
-import ru.skypro.homework.dto.auth.Role;
 import ru.skypro.homework.model.AdsDao;
 import ru.skypro.homework.model.CommentsDao;
 import ru.skypro.homework.model.UsersDao;
-import ru.skypro.homework.AbstractIntegrationTest;
 import ru.skypro.homework.repository.AdRepository;
 import ru.skypro.homework.repository.CommentRepository;
 import ru.skypro.homework.repository.UserRepository;
 
 import java.time.LocalDateTime;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 class CommentControllerIntegrationTest extends AbstractIntegrationTest {
 
-    @Autowired
-    private UserRepository userRepository;
+    @Autowired private UserRepository userRepository;
 
-    @Autowired
-    private AdRepository adRepository;
+    @Autowired private AdRepository adRepository;
 
-    @Autowired
-    private CommentRepository commentRepository;
+    @Autowired private CommentRepository commentRepository;
 
     private UsersDao author;
     private UsersDao otherUser;
@@ -102,8 +100,10 @@ class CommentControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void getComments_ShouldReturnList() {
-        ResponseEntity<CommentsDto> response = withAuth(author.getEmail(), authorPassword)
-                .getForEntity(baseUrl() + "/ads/{adId}/comments", CommentsDto.class, ad.getPk());
+        ResponseEntity<CommentsDto> response =
+                withAuth(author.getEmail(), authorPassword)
+                        .getForEntity(
+                                baseUrl() + "/ads/{adId}/comments", CommentsDto.class, ad.getPk());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -118,8 +118,13 @@ class CommentControllerIntegrationTest extends AbstractIntegrationTest {
         newComment.setText("New comment");
 
         HttpEntity<CreateOrUpdateCommentDto> request = new HttpEntity<>(newComment);
-        ResponseEntity<CommentDto> response = withAuth(otherUser.getEmail(), otherPassword)
-                .postForEntity(baseUrl() + "/ads/{adId}/comments", request, CommentDto.class, ad.getPk());
+        ResponseEntity<CommentDto> response =
+                withAuth(otherUser.getEmail(), otherPassword)
+                        .postForEntity(
+                                baseUrl() + "/ads/{adId}/comments",
+                                request,
+                                CommentDto.class,
+                                ad.getPk());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -132,9 +137,15 @@ class CommentControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void deleteComment_ByAuthor_ShouldReturnOk() {
-        ResponseEntity<Void> response = withAuth(author.getEmail(), authorPassword)
-                .exchange(baseUrl() + "/ads/{adId}/comments/{commentId}",
-                        HttpMethod.DELETE, null, Void.class, ad.getPk(), comment.getPk());
+        ResponseEntity<Void> response =
+                withAuth(author.getEmail(), authorPassword)
+                        .exchange(
+                                baseUrl() + "/ads/{adId}/comments/{commentId}",
+                                HttpMethod.DELETE,
+                                null,
+                                Void.class,
+                                ad.getPk(),
+                                comment.getPk());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(commentRepository.findById(comment.getPk())).isEmpty();
@@ -142,9 +153,15 @@ class CommentControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void deleteComment_ByAdmin_ShouldReturnOk() {
-        ResponseEntity<Void> response = withAuth(admin.getEmail(), adminPassword)
-                .exchange(baseUrl() + "/ads/{adId}/comments/{commentId}",
-                        HttpMethod.DELETE, null, Void.class, ad.getPk(), comment.getPk());
+        ResponseEntity<Void> response =
+                withAuth(admin.getEmail(), adminPassword)
+                        .exchange(
+                                baseUrl() + "/ads/{adId}/comments/{commentId}",
+                                HttpMethod.DELETE,
+                                null,
+                                Void.class,
+                                ad.getPk(),
+                                comment.getPk());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(commentRepository.findById(comment.getPk())).isEmpty();
@@ -152,9 +169,15 @@ class CommentControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void deleteComment_ByOtherUser_ShouldReturnForbidden() {
-        ResponseEntity<Void> response = withAuth(otherUser.getEmail(), otherPassword)
-                .exchange(baseUrl() + "/ads/{adId}/comments/{commentId}",
-                        HttpMethod.DELETE, null, Void.class, ad.getPk(), comment.getPk());
+        ResponseEntity<Void> response =
+                withAuth(otherUser.getEmail(), otherPassword)
+                        .exchange(
+                                baseUrl() + "/ads/{adId}/comments/{commentId}",
+                                HttpMethod.DELETE,
+                                null,
+                                Void.class,
+                                ad.getPk(),
+                                comment.getPk());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
         assertThat(commentRepository.findById(comment.getPk())).isPresent();
@@ -165,15 +188,15 @@ class CommentControllerIntegrationTest extends AbstractIntegrationTest {
         CreateOrUpdateCommentDto update = new CreateOrUpdateCommentDto();
         update.setText("Updated comment");
 
-        ResponseEntity<CommentDto> response = patchWithAuth(
-                baseUrl() + "/ads/{adId}/comments/{commentId}",
-                update,
-                CommentDto.class,
-                author.getEmail(),
-                authorPassword,
-                ad.getPk(),
-                comment.getPk()
-        );
+        ResponseEntity<CommentDto> response =
+                patchWithAuth(
+                        baseUrl() + "/ads/{adId}/comments/{commentId}",
+                        update,
+                        CommentDto.class,
+                        author.getEmail(),
+                        authorPassword,
+                        ad.getPk(),
+                        comment.getPk());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -189,15 +212,15 @@ class CommentControllerIntegrationTest extends AbstractIntegrationTest {
         CreateOrUpdateCommentDto update = new CreateOrUpdateCommentDto();
         update.setText("Hacked comment");
 
-        ResponseEntity<Void> response = patchWithAuth(
-                baseUrl() + "/ads/{adId}/comments/{commentId}",
-                update,
-                Void.class,
-                otherUser.getEmail(),
-                otherPassword,
-                ad.getPk(),
-                comment.getPk()
-        );
+        ResponseEntity<Void> response =
+                patchWithAuth(
+                        baseUrl() + "/ads/{adId}/comments/{commentId}",
+                        update,
+                        Void.class,
+                        otherUser.getEmail(),
+                        otherPassword,
+                        ad.getPk(),
+                        comment.getPk());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
         CommentsDao unchanged = commentRepository.findById(comment.getPk()).orElseThrow();
@@ -210,24 +233,26 @@ class CommentControllerIntegrationTest extends AbstractIntegrationTest {
         newComment.setText("New comment");
 
         HttpEntity<CreateOrUpdateCommentDto> requestEntity = new HttpEntity<>(newComment);
-        ResponseEntity<CommentDto> response = restTemplate.postForEntity(
-                baseUrl() + "/ads/{adId}/comments",
-                requestEntity,
-                CommentDto.class,
-                ad.getPk());
+        ResponseEntity<CommentDto> response =
+                restTemplate.postForEntity(
+                        baseUrl() + "/ads/{adId}/comments",
+                        requestEntity,
+                        CommentDto.class,
+                        ad.getPk());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
     @Test
     void deleteComment_WithoutAuth_ShouldReturnUnauthorized() {
-        ResponseEntity<Void> response = restTemplate.exchange(
-                baseUrl() + "/ads/{adId}/comments/{commentId}",
-                HttpMethod.DELETE,
-                null,
-                Void.class,
-                ad.getPk(),
-                comment.getPk());
+        ResponseEntity<Void> response =
+                restTemplate.exchange(
+                        baseUrl() + "/ads/{adId}/comments/{commentId}",
+                        HttpMethod.DELETE,
+                        null,
+                        Void.class,
+                        ad.getPk(),
+                        comment.getPk());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
@@ -238,21 +263,23 @@ class CommentControllerIntegrationTest extends AbstractIntegrationTest {
         update.setText("Updated");
 
         HttpEntity<CreateOrUpdateCommentDto> requestEntity = new HttpEntity<>(update);
-        ResponseEntity<CommentDto> response = restTemplate.exchange(
-                baseUrl() + "/ads/{adId}/comments/{commentId}",
-                HttpMethod.PATCH,
-                requestEntity,
-                CommentDto.class,
-                ad.getPk(),
-                comment.getPk());
+        ResponseEntity<CommentDto> response =
+                restTemplate.exchange(
+                        baseUrl() + "/ads/{adId}/comments/{commentId}",
+                        HttpMethod.PATCH,
+                        requestEntity,
+                        CommentDto.class,
+                        ad.getPk(),
+                        comment.getPk());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
     @Test
     void getComments_WithNonExistentAd_ShouldReturn404() {
-        ResponseEntity<String> response = withAuth(author.getEmail(), authorPassword)
-                .getForEntity(baseUrl() + "/ads/999999/comments", String.class);
+        ResponseEntity<String> response =
+                withAuth(author.getEmail(), authorPassword)
+                        .getForEntity(baseUrl() + "/ads/999999/comments", String.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
@@ -265,11 +292,12 @@ class CommentControllerIntegrationTest extends AbstractIntegrationTest {
         headers.setBasicAuth(otherUser.getEmail(), otherPassword);
         HttpEntity<CreateOrUpdateCommentDto> requestEntity = new HttpEntity<>(newComment, headers);
 
-        ResponseEntity<String> response = restTemplate.exchange(
-                baseUrl() + "/ads/999999/comments",
-                HttpMethod.POST,
-                requestEntity,
-                String.class);
+        ResponseEntity<String> response =
+                restTemplate.exchange(
+                        baseUrl() + "/ads/999999/comments",
+                        HttpMethod.POST,
+                        requestEntity,
+                        String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
@@ -280,11 +308,12 @@ class CommentControllerIntegrationTest extends AbstractIntegrationTest {
         headers.setBasicAuth(author.getEmail(), authorPassword);
         HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
 
-        ResponseEntity<String> response = restTemplate.exchange(
-                baseUrl() + "/ads/" + ad.getPk() + "/comments/999999",
-                HttpMethod.DELETE,
-                requestEntity,
-                String.class);
+        ResponseEntity<String> response =
+                restTemplate.exchange(
+                        baseUrl() + "/ads/" + ad.getPk() + "/comments/999999",
+                        HttpMethod.DELETE,
+                        requestEntity,
+                        String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
@@ -298,11 +327,12 @@ class CommentControllerIntegrationTest extends AbstractIntegrationTest {
         headers.setBasicAuth(author.getEmail(), authorPassword);
         HttpEntity<CreateOrUpdateCommentDto> requestEntity = new HttpEntity<>(update, headers);
 
-        ResponseEntity<String> response = restTemplate.exchange(
-                baseUrl() + "/ads/" + ad.getPk() + "/comments/999999",
-                HttpMethod.PATCH,
-                requestEntity,
-                String.class);
+        ResponseEntity<String> response =
+                restTemplate.exchange(
+                        baseUrl() + "/ads/" + ad.getPk() + "/comments/999999",
+                        HttpMethod.PATCH,
+                        requestEntity,
+                        String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }

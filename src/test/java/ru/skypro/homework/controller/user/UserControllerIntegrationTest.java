@@ -1,5 +1,10 @@
 package ru.skypro.homework.controller.user;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,12 +20,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
+
+import ru.skypro.homework.AbstractIntegrationTest;
 import ru.skypro.homework.dto.auth.Role;
 import ru.skypro.homework.dto.user.NewPasswordDto;
 import ru.skypro.homework.dto.user.UpdateUserDto;
 import ru.skypro.homework.dto.user.UserDto;
 import ru.skypro.homework.model.UsersDao;
-import ru.skypro.homework.AbstractIntegrationTest;
 import ru.skypro.homework.repository.AdRepository;
 import ru.skypro.homework.repository.CommentRepository;
 import ru.skypro.homework.repository.UserRepository;
@@ -28,24 +34,15 @@ import ru.skypro.homework.service.ImageService;
 
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
-
 class UserControllerIntegrationTest extends AbstractIntegrationTest {
 
-    @Autowired
-    private UserRepository userRepository;
+    @Autowired private UserRepository userRepository;
 
-    @Autowired
-    private AdRepository adRepository;
+    @Autowired private AdRepository adRepository;
 
-    @Autowired
-    private CommentRepository commentRepository;
+    @Autowired private CommentRepository commentRepository;
 
-    @MockBean
-    private ImageService imageService;
+    @MockBean private ImageService imageService;
 
     private UsersDao testUser;
     private final String userEmail = "user@test.com";
@@ -64,21 +61,27 @@ class UserControllerIntegrationTest extends AbstractIntegrationTest {
         userRepository.save(testUser);
 
         when(imageService.saveImage(any(MultipartFile.class), anyString(), anyString()))
-                .thenAnswer(invocation -> {
-                    MultipartFile file = invocation.getArgument(0);
-                    String originalFilename = file.getOriginalFilename();
-                    String extension = "";
-                    if (originalFilename != null && originalFilename.contains(".")) {
-                        extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-                    }
-                    return "/avatars/" + UUID.randomUUID() + extension;
-                });
+                .thenAnswer(
+                        invocation -> {
+                            MultipartFile file = invocation.getArgument(0);
+                            String originalFilename = file.getOriginalFilename();
+                            String extension = "";
+                            if (originalFilename != null && originalFilename.contains(".")) {
+                                extension =
+                                        originalFilename.substring(
+                                                originalFilename.lastIndexOf("."));
+                            }
+                            return "/avatars/" + UUID.randomUUID() + extension;
+                        });
 
         when(imageService.readImageAsBytes(anyString(), anyString()))
-                .thenAnswer(invocation -> {
-                    String imagePath = invocation.getArgument(0);
-                    return imagePath.contains("new") ? "new avatar".getBytes() : "old avatar".getBytes();
-                });
+                .thenAnswer(
+                        invocation -> {
+                            String imagePath = invocation.getArgument(0);
+                            return imagePath.contains("new")
+                                    ? "new avatar".getBytes()
+                                    : "old avatar".getBytes();
+                        });
     }
 
     @AfterEach
@@ -90,8 +93,9 @@ class UserControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void getUser_ShouldReturnUserInfo() {
-        ResponseEntity<UserDto> response = withAuth(userEmail, userPassword)
-                .getForEntity(baseUrl() + "/users/me", UserDto.class);
+        ResponseEntity<UserDto> response =
+                withAuth(userEmail, userPassword)
+                        .getForEntity(baseUrl() + "/users/me", UserDto.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -111,13 +115,13 @@ class UserControllerIntegrationTest extends AbstractIntegrationTest {
         update.setLastName("Петров");
         update.setPhone("+7 (999) 999-99-99");
 
-        ResponseEntity<UpdateUserDto> response = patchWithAuth(
-                baseUrl() + "/users/me",
-                update,
-                UpdateUserDto.class,
-                userEmail,
-                userPassword
-        );
+        ResponseEntity<UpdateUserDto> response =
+                patchWithAuth(
+                        baseUrl() + "/users/me",
+                        update,
+                        UpdateUserDto.class,
+                        userEmail,
+                        userPassword);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -138,17 +142,20 @@ class UserControllerIntegrationTest extends AbstractIntegrationTest {
         passwordDto.setNewPassword("newPassword");
 
         HttpEntity<NewPasswordDto> request = new HttpEntity<>(passwordDto);
-        ResponseEntity<Void> response = withAuth(userEmail, userPassword)
-                .postForEntity(baseUrl() + "/users/set_password", request, Void.class);
+        ResponseEntity<Void> response =
+                withAuth(userEmail, userPassword)
+                        .postForEntity(baseUrl() + "/users/set_password", request, Void.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        ResponseEntity<UserDto> failedLogin = withAuth(userEmail, userPassword)
-                .getForEntity(baseUrl() + "/users/me", UserDto.class);
+        ResponseEntity<UserDto> failedLogin =
+                withAuth(userEmail, userPassword)
+                        .getForEntity(baseUrl() + "/users/me", UserDto.class);
         assertThat(failedLogin.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
 
-        ResponseEntity<UserDto> successLogin = withAuth(userEmail, "newPassword")
-                .getForEntity(baseUrl() + "/users/me", UserDto.class);
+        ResponseEntity<UserDto> successLogin =
+                withAuth(userEmail, "newPassword")
+                        .getForEntity(baseUrl() + "/users/me", UserDto.class);
         assertThat(successLogin.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
@@ -159,8 +166,9 @@ class UserControllerIntegrationTest extends AbstractIntegrationTest {
         passwordDto.setNewPassword("newPassword");
 
         HttpEntity<NewPasswordDto> request = new HttpEntity<>(passwordDto);
-        ResponseEntity<Void> response = withAuth(userEmail, userPassword)
-                .postForEntity(baseUrl() + "/users/set_password", request, Void.class);
+        ResponseEntity<Void> response =
+                withAuth(userEmail, userPassword)
+                        .postForEntity(baseUrl() + "/users/set_password", request, Void.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
@@ -170,23 +178,20 @@ class UserControllerIntegrationTest extends AbstractIntegrationTest {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-        ByteArrayResource imagePart = new ByteArrayResource("new avatar".getBytes()) {
-            @Override
-            public String getFilename() {
-                return "avatar.jpg";
-            }
-        };
+        ByteArrayResource imagePart =
+                new ByteArrayResource("new avatar".getBytes()) {
+                    @Override
+                    public String getFilename() {
+                        return "avatar.jpg";
+                    }
+                };
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         body.add("image", imagePart);
 
-        ResponseEntity<Void> response = patchMultipartWithAuth(
-                baseUrl() + "/users/me/image",
-                body,
-                Void.class,
-                userEmail,
-                userPassword
-        );
+        ResponseEntity<Void> response =
+                patchMultipartWithAuth(
+                        baseUrl() + "/users/me/image", body, Void.class, userEmail, userPassword);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
@@ -197,7 +202,8 @@ class UserControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void getUser_WithoutAuth_ShouldReturnUnauthorized() {
-        ResponseEntity<UserDto> response = restTemplate.getForEntity(baseUrl() + "/users/me", UserDto.class);
+        ResponseEntity<UserDto> response =
+                restTemplate.getForEntity(baseUrl() + "/users/me", UserDto.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
@@ -209,11 +215,12 @@ class UserControllerIntegrationTest extends AbstractIntegrationTest {
         update.setPhone("+7 (999) 999-99-99");
 
         HttpEntity<UpdateUserDto> requestEntity = new HttpEntity<>(update);
-        ResponseEntity<UpdateUserDto> response = restTemplate.exchange(
-                baseUrl() + "/users/me",
-                HttpMethod.PATCH,
-                requestEntity,
-                UpdateUserDto.class);
+        ResponseEntity<UpdateUserDto> response =
+                restTemplate.exchange(
+                        baseUrl() + "/users/me",
+                        HttpMethod.PATCH,
+                        requestEntity,
+                        UpdateUserDto.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
@@ -225,10 +232,9 @@ class UserControllerIntegrationTest extends AbstractIntegrationTest {
         passwordDto.setNewPassword("new");
 
         HttpEntity<NewPasswordDto> requestEntity = new HttpEntity<>(passwordDto);
-        ResponseEntity<Void> response = restTemplate.postForEntity(
-                baseUrl() + "/users/set_password",
-                requestEntity,
-                Void.class);
+        ResponseEntity<Void> response =
+                restTemplate.postForEntity(
+                        baseUrl() + "/users/set_password", requestEntity, Void.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
@@ -238,20 +244,21 @@ class UserControllerIntegrationTest extends AbstractIntegrationTest {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-        ByteArrayResource imagePart = new ByteArrayResource("new avatar".getBytes()) {
-            @Override
-            public String getFilename() { return "avatar.jpg"; }
-        };
+        ByteArrayResource imagePart =
+                new ByteArrayResource("new avatar".getBytes()) {
+                    @Override
+                    public String getFilename() {
+                        return "avatar.jpg";
+                    }
+                };
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         body.add("image", imagePart);
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-        ResponseEntity<Void> response = restTemplate.exchange(
-                baseUrl() + "/users/me/image",
-                HttpMethod.PATCH,
-                requestEntity,
-                Void.class);
+        ResponseEntity<Void> response =
+                restTemplate.exchange(
+                        baseUrl() + "/users/me/image", HttpMethod.PATCH, requestEntity, Void.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }

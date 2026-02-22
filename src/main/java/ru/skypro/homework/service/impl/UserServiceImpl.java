@@ -2,11 +2,13 @@ package ru.skypro.homework.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
 import ru.skypro.homework.constants.ExceptionMessages;
 import ru.skypro.homework.constants.UrlPrefixConstants;
 import ru.skypro.homework.dto.user.NewPasswordDto;
@@ -21,11 +23,10 @@ import ru.skypro.homework.service.ImageService;
 import ru.skypro.homework.service.UserService;
 
 /**
- * Реализация сервиса {@link UserService}.
- * Использует {@link UserRepository} для доступа к данным пользователей,
- * {@link PasswordEncoder} для шифрования паролей,
- * {@link CurrentUserService} для получения текущего аутентифицированного пользователя,
- * {@link ImageService} для сохранения и удаления аватаров.
+ * Реализация сервиса {@link UserService}. Использует {@link UserRepository} для доступа к данным
+ * пользователей, {@link PasswordEncoder} для шифрования паролей, {@link CurrentUserService} для
+ * получения текущего аутентифицированного пользователя, {@link ImageService} для сохранения и
+ * удаления аватаров.
  *
  * @see UserService
  * @see UserRepository
@@ -77,7 +78,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public void updateUserImage(MultipartFile image) {
         UsersDao user = currentUserService.getCurrentUser();
-        String newImagePath = imageService.saveImage(image, avatarDir, UrlPrefixConstants.URL_PREFIX_AVATARS);
+        String newImagePath =
+                imageService.saveImage(image, avatarDir, UrlPrefixConstants.URL_PREFIX_AVATARS);
         if (user.getImage() != null) {
             imageService.deleteImage(user.getImage(), avatarDir);
         }

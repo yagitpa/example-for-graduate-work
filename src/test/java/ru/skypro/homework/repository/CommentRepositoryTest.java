@@ -1,8 +1,11 @@
 package ru.skypro.homework.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+
 import ru.skypro.homework.AbstractIntegrationTest;
 import ru.skypro.homework.dto.auth.Role;
 import ru.skypro.homework.model.AdsDao;
@@ -13,19 +16,14 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 @Transactional
 class CommentRepositoryTest extends AbstractIntegrationTest {
 
-    @Autowired
-    private CommentRepository commentRepository;
+    @Autowired private CommentRepository commentRepository;
 
-    @Autowired
-    private AdRepository adRepository;
+    @Autowired private AdRepository adRepository;
 
-    @Autowired
-    private UserRepository userRepository;
+    @Autowired private UserRepository userRepository;
 
     private UsersDao createUser(String email) {
         UsersDao user = new UsersDao();
@@ -47,7 +45,8 @@ class CommentRepositoryTest extends AbstractIntegrationTest {
         return adRepository.saveAndFlush(ad);
     }
 
-    private CommentsDao createComment(UsersDao author, AdsDao ad, String text, LocalDateTime createdAt) {
+    private CommentsDao createComment(
+            UsersDao author, AdsDao ad, String text, LocalDateTime createdAt) {
         CommentsDao comment = new CommentsDao();
         comment.setText(text);
         comment.setCreatedAt(createdAt);
@@ -80,7 +79,8 @@ class CommentRepositoryTest extends AbstractIntegrationTest {
         AdsDao ad = createAd(author);
         CommentsDao comment = createComment(author, ad, "Test comment", LocalDateTime.now());
 
-        Optional<CommentsDao> found = commentRepository.findByPkAndAdPk(comment.getPk(), ad.getPk());
+        Optional<CommentsDao> found =
+                commentRepository.findByPkAndAdPk(comment.getPk(), ad.getPk());
 
         assertThat(found).isPresent();
         assertThat(found.get().getText()).isEqualTo("Test comment");
@@ -93,7 +93,8 @@ class CommentRepositoryTest extends AbstractIntegrationTest {
         AdsDao ad2 = createAd(author);
         CommentsDao comment = createComment(author, ad1, "Test", LocalDateTime.now());
 
-        Optional<CommentsDao> found = commentRepository.findByPkAndAdPk(comment.getPk(), ad2.getPk());
+        Optional<CommentsDao> found =
+                commentRepository.findByPkAndAdPk(comment.getPk(), ad2.getPk());
         assertThat(found).isEmpty();
     }
 
@@ -104,11 +105,13 @@ class CommentRepositoryTest extends AbstractIntegrationTest {
         AdsDao ad = createAd(author);
         CommentsDao comment = createComment(author, ad, "Author comment", LocalDateTime.now());
 
-        Optional<CommentsDao> found = commentRepository.findByPkAndAuthorId(comment.getPk(), author.getId());
+        Optional<CommentsDao> found =
+                commentRepository.findByPkAndAuthorId(comment.getPk(), author.getId());
         assertThat(found).isPresent();
         assertThat(found.get().getText()).isEqualTo("Author comment");
 
-        Optional<CommentsDao> notFound = commentRepository.findByPkAndAuthorId(comment.getPk(), other.getId());
+        Optional<CommentsDao> notFound =
+                commentRepository.findByPkAndAuthorId(comment.getPk(), other.getId());
         assertThat(notFound).isEmpty();
     }
 
