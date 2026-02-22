@@ -118,9 +118,8 @@ public class AdController {
             @ApiResponse(responseCode = "401", description = "Пользователь не авторизован")
     })
     @GetMapping("/me")
-    public ResponseEntity<AdsDto> getAdsMe(Authentication authentication) {
-        String email = authentication.getName();
-        return ResponseEntity.ok(adService.getAdsMe(email));
+    public ResponseEntity<AdsDto> getAdsMe() {
+        return ResponseEntity.ok(adService.getAdsMe());
     }
 
     @Operation(summary = "Обновление картинки объявления")

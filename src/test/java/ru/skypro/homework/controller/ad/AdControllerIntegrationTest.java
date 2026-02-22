@@ -304,4 +304,216 @@ class AdControllerIntegrationTest extends AbstractIntegrationTest {
         assertThat(updated.getImage()).startsWith("/ads-images/");
         assertThat(updated.getImage()).isNotEqualTo(testAd.getImage());
     }
+
+    // ====== ТЕСТЫ НА 401 (БЕЗ АВТОРИЗАЦИИ) ======
+
+    @Test
+    void addAd_WithoutAuth_ShouldReturnUnauthorized() throws Exception {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        CreateOrUpdateAdDto properties = new CreateOrUpdateAdDto();
+        properties.setTitle("New Ad");
+        properties.setDescription("New Description");
+        properties.setPrice(999);
+
+        String propertiesJson = objectMapper.writeValueAsString(properties);
+        HttpEntity<MultiValueMap<String, Object>> requestEntity = getMultiValueMapHttpEntity(propertiesJson, headers);
+
+        ResponseEntity<AdDto> response = restTemplate.postForEntity(baseUrl() + "/ads", requestEntity, AdDto.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
+
+    private static @NotNull HttpEntity<MultiValueMap<String, Object>> getMultiValueMapHttpEntity(String propertiesJson, HttpHeaders headers) {
+        ByteArrayResource propertiesPart = new ByteArrayResource(propertiesJson.getBytes()) {
+            @Override
+            public String getFilename() {
+                return "properties.json";
+            }
+        };
+
+        ByteArrayResource imagePart = new ByteArrayResource("image content".getBytes()) {
+            @Override
+            public String getFilename() {
+                return "image.jpg";
+            }
+        };
+
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("properties", propertiesPart);
+        body.add("image", imagePart);
+
+        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+        return requestEntity;
+    }
+
+    @Test
+    void updateAd_WithoutAuth_ShouldReturnUnauthorized() {
+        CreateOrUpdateAdDto update = new CreateOrUpdateAdDto();
+        update.setTitle("Updated Title");
+        update.setDescription("Updated Description");
+        update.setPrice(2000);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBasicAuth("wrong", "creds"); // можно не ставить, но для чистоты используем без аутентификации
+        HttpEntity<CreateOrUpdateAdDto> requestEntity = new HttpEntity<>(update, headers);
+
+        ResponseEntity<AdDto> response = restTemplate.exchange(
+                baseUrl() + "/ads/" + testAd.getPk(),
+                HttpMethod.PATCH,
+                requestEntity,
+                AdDto.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
+    void removeAd_WithoutAuth_ShouldReturnUnauthorized() {
+        ResponseEntity<Void> response = restTemplate.exchange(
+                baseUrl() + "/ads/" + testAd.getPk(),
+                HttpMethod.DELETE,
+                null,
+                Void.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
+    void getAdsMe_WithoutAuth_ShouldReturnUnauthorized() {
+        ResponseEntity<String> response = restTemplate.getForEntity(baseUrl() + "/ads/me", String.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
+    void updateImage_WithoutAuth_ShouldReturnUnauthorized() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        ByteArrayResource imagePart = new ByteArrayResource("new image".getBytes()) {
+            @Override
+            public String getFilename() {
+                return "image.jpg";
+            }
+        };
+
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("image", imagePart);
+
+        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+        ResponseEntity<Void> response = restTemplate.exchange(
+                baseUrl() + "/ads/" + testAd.getPk() + "/image",
+                HttpMethod.PATCH,
+                requestEntity,
+                Void.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
+
+    // ====== ТЕСТЫ на 404 для несуществующего объявления ======
+
+    @Test
+    void getAd_NotFound_ShouldReturn404() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBasicAuth(userEmail, userPassword);
+        HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(
+                baseUrl() + "/ads/999999",
+                HttpMethod.GET,
+                requestEntity,
+                String.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void updateAd_NotFound_ShouldReturn404() {
+        CreateOrUpdateAdDto update = new CreateOrUpdateAdDto();
+        update.setTitle("Updated Title");
+        update.setDescription("Updated Description");
+        update.setPrice(2000);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBasicAuth(userEmail, userPassword);
+        HttpEntity<CreateOrUpdateAdDto> requestEntity = new HttpEntity<>(update, headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(
+                baseUrl() + "/ads/999999",
+                HttpMethod.PATCH,
+                requestEntity,
+                String.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void removeAd_NotFound_ShouldReturn404() {
+        ResponseEntity<Void> response = withAuth(userEmail, userPassword)
+                .exchange(baseUrl() + "/ads/999999", HttpMethod.DELETE, null, Void.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void updateImage_NotFound_ShouldReturn404() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        headers.setBasicAuth(userEmail, userPassword);
+
+        ByteArrayResource imagePart = new ByteArrayResource("new image".getBytes()) {
+            @Override
+            public String getFilename() {
+                return "image.jpg";
+            }
+        };
+
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("image", imagePart);
+
+        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+        ResponseEntity<Void> response = restTemplate.exchange(
+                baseUrl() + "/ads/999999/image",
+                HttpMethod.PATCH,
+                requestEntity,
+                Void.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    // ====== ТЕСТЫ на 403 (обновление чужого объявления)
+
+    @Test
+    void updateAd_ByOtherUser_ShouldReturnForbidden() {
+        CreateOrUpdateAdDto update = new CreateOrUpdateAdDto();
+        update.setTitle("Hacked Title");
+        update.setDescription("Hacked Description");
+        update.setPrice(1);
+
+        UsersDao other = new UsersDao();
+        other.setEmail("other2@test.com");
+        other.setPassword(passwordEncoder.encode("password"));
+        other.setFirstName("Другой");
+        other.setLastName("Пользователь");
+        other.setPhone("+7 (999) 111-22-33");
+        other.setRole(Role.USER);
+        userRepository.save(other);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBasicAuth("other2@test.com", "password");
+        HttpEntity<CreateOrUpdateAdDto> requestEntity = new HttpEntity<>(update, headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(
+                baseUrl() + "/ads/" + testAd.getPk(),
+                HttpMethod.PATCH,
+                requestEntity,
+                String.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
 }

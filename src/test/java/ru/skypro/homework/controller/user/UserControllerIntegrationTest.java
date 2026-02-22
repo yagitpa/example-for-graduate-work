@@ -8,6 +8,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -192,5 +193,66 @@ class UserControllerIntegrationTest extends AbstractIntegrationTest {
         UsersDao updated = userRepository.findById(testUser.getId()).orElseThrow();
         assertThat(updated.getImage()).startsWith("/avatars/");
         assertThat(updated.getImage()).isNotEqualTo(testUser.getImage());
+    }
+
+    @Test
+    void getUser_WithoutAuth_ShouldReturnUnauthorized() {
+        ResponseEntity<UserDto> response = restTemplate.getForEntity(baseUrl() + "/users/me", UserDto.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
+    void updateUser_WithoutAuth_ShouldReturnUnauthorized() {
+        UpdateUserDto update = new UpdateUserDto();
+        update.setFirstName("Пётр");
+        update.setLastName("Петров");
+        update.setPhone("+7 (999) 999-99-99");
+
+        HttpEntity<UpdateUserDto> requestEntity = new HttpEntity<>(update);
+        ResponseEntity<UpdateUserDto> response = restTemplate.exchange(
+                baseUrl() + "/users/me",
+                HttpMethod.PATCH,
+                requestEntity,
+                UpdateUserDto.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
+    void setPassword_WithoutAuth_ShouldReturnUnauthorized() {
+        NewPasswordDto passwordDto = new NewPasswordDto();
+        passwordDto.setCurrentPassword("any");
+        passwordDto.setNewPassword("new");
+
+        HttpEntity<NewPasswordDto> requestEntity = new HttpEntity<>(passwordDto);
+        ResponseEntity<Void> response = restTemplate.postForEntity(
+                baseUrl() + "/users/set_password",
+                requestEntity,
+                Void.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
+    void updateUserImage_WithoutAuth_ShouldReturnUnauthorized() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        ByteArrayResource imagePart = new ByteArrayResource("new avatar".getBytes()) {
+            @Override
+            public String getFilename() { return "avatar.jpg"; }
+        };
+
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("image", imagePart);
+
+        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+        ResponseEntity<Void> response = restTemplate.exchange(
+                baseUrl() + "/users/me/image",
+                HttpMethod.PATCH,
+                requestEntity,
+                Void.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 }

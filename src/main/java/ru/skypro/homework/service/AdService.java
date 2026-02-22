@@ -52,10 +52,9 @@ public interface AdService {
     /**
      * Получение всех объявлений текущего пользователя.
      *
-     * @param email email автора
      * @return AdsDto с его объявлениями
      */
-    AdsDto getAdsMe(String email);
+    AdsDto getAdsMe();
 
     /**
      * Обновление картинки объявления.

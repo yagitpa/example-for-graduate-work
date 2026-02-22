@@ -18,29 +18,26 @@ public interface CommentService {
      * Добавление комментария к объявлению
      *
      * @param adId идентификатор объявления
-     * @param email email автора комментария
      * @param createComment данные нового комментария
      * @return созданный комментарий
      */
-    CommentDto addComment(Integer adId, String email, CreateOrUpdateCommentDto createComment);
+    CommentDto addComment(Integer adId, CreateOrUpdateCommentDto createComment);
 
     /**
      * Удаление комментария
      *
      * @param adId идентификатор объявления
      * @param commentId идентификатор комментария
-     * @param email email текущего пользователя
      */
-    void deleteComment(Integer adId, Integer commentId, String email);
+    void deleteComment(Integer adId, Integer commentId);
 
     /**
      * Обновление комментария
      *
      * @param adId идентификатор объявления
      * @param commentId идентификатор комментария
-     * @param email email текущего пользователя
      * @param updateComment новые данные комментария
      * @return обновлённый комментарий
      */
-    CommentDto updateComment(Integer adId, Integer commentId, String email, CreateOrUpdateCommentDto updateComment);
+    CommentDto updateComment(Integer adId, Integer commentId, CreateOrUpdateCommentDto updateComment);
 }

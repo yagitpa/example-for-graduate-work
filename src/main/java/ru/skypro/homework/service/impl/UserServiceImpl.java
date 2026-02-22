@@ -35,33 +35,33 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public UserDto getUser(String email) {
-        UsersDao user = currentUserService.getUserByEmail(email);
+    public UserDto getUser() {
+        UsersDao user = currentUserService.getCurrentUser();
         return userMapper.toUserDto(user);
     }
 
     @Override
-    public UpdateUserDto updateUser(String email, UpdateUserDto updateUserDto) {
-        UsersDao user = currentUserService.getUserByEmail(email);
+    public UpdateUserDto updateUser(UpdateUserDto updateUserDto) {
+        UsersDao user = currentUserService.getCurrentUser();
         userMapper.updateUserFromDto(updateUserDto, user);
         userRepository.save(user);
         return updateUserDto;
     }
 
     @Override
-    public void setPassword(String email, NewPasswordDto newPasswordDto) {
-        UsersDao user = currentUserService.getUserByEmail(email);
+    public void setPassword(NewPasswordDto newPasswordDto) {
+        UsersDao user = currentUserService.getCurrentUser();
         if (!passwordEncoder.matches(newPasswordDto.getCurrentPassword(), user.getPassword())) {
             throw new InvalidCurrentPasswordException("Current password is incorrect");
         }
         user.setPassword(passwordEncoder.encode(newPasswordDto.getNewPassword()));
         userRepository.save(user);
-        log.info("Password changed for user: {}", email);
+        log.info("Password changed for user: {}", user.getEmail());
     }
 
     @Override
-    public void updateUserImage(String email, MultipartFile image) {
-        UsersDao user = currentUserService.getUserByEmail(email);
+    public void updateUserImage(MultipartFile image) {
+        UsersDao user = currentUserService.getCurrentUser();
         String newImagePath = imageService.saveImage(image, avatarDir, "/avatars/");
         if (user.getImage() != null) {
             imageService.deleteImage(user.getImage(), avatarDir);

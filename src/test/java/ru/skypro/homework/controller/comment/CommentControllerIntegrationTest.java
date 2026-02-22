@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -201,5 +202,108 @@ class CommentControllerIntegrationTest extends AbstractIntegrationTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
         CommentsDao unchanged = commentRepository.findById(comment.getPk()).orElseThrow();
         assertThat(unchanged.getText()).isEqualTo("Original comment");
+    }
+
+    @Test
+    void addComment_WithoutAuth_ShouldReturnUnauthorized() {
+        CreateOrUpdateCommentDto newComment = new CreateOrUpdateCommentDto();
+        newComment.setText("New comment");
+
+        HttpEntity<CreateOrUpdateCommentDto> requestEntity = new HttpEntity<>(newComment);
+        ResponseEntity<CommentDto> response = restTemplate.postForEntity(
+                baseUrl() + "/ads/{adId}/comments",
+                requestEntity,
+                CommentDto.class,
+                ad.getPk());
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
+    void deleteComment_WithoutAuth_ShouldReturnUnauthorized() {
+        ResponseEntity<Void> response = restTemplate.exchange(
+                baseUrl() + "/ads/{adId}/comments/{commentId}",
+                HttpMethod.DELETE,
+                null,
+                Void.class,
+                ad.getPk(),
+                comment.getPk());
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
+    void updateComment_WithoutAuth_ShouldReturnUnauthorized() {
+        CreateOrUpdateCommentDto update = new CreateOrUpdateCommentDto();
+        update.setText("Updated");
+
+        HttpEntity<CreateOrUpdateCommentDto> requestEntity = new HttpEntity<>(update);
+        ResponseEntity<CommentDto> response = restTemplate.exchange(
+                baseUrl() + "/ads/{adId}/comments/{commentId}",
+                HttpMethod.PATCH,
+                requestEntity,
+                CommentDto.class,
+                ad.getPk(),
+                comment.getPk());
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
+    void getComments_WithNonExistentAd_ShouldReturn404() {
+        ResponseEntity<String> response = withAuth(author.getEmail(), authorPassword)
+                .getForEntity(baseUrl() + "/ads/999999/comments", String.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void addComment_WithNonExistentAd_ShouldReturn404() {
+        CreateOrUpdateCommentDto newComment = new CreateOrUpdateCommentDto();
+        newComment.setText("New comment");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBasicAuth(otherUser.getEmail(), otherPassword);
+        HttpEntity<CreateOrUpdateCommentDto> requestEntity = new HttpEntity<>(newComment, headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(
+                baseUrl() + "/ads/999999/comments",
+                HttpMethod.POST,
+                requestEntity,
+                String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void deleteComment_WithNonExistentComment_ShouldReturn404() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBasicAuth(author.getEmail(), authorPassword);
+        HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(
+                baseUrl() + "/ads/" + ad.getPk() + "/comments/999999",
+                HttpMethod.DELETE,
+                requestEntity,
+                String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void updateComment_WithNonExistentComment_ShouldReturn404() {
+        CreateOrUpdateCommentDto update = new CreateOrUpdateCommentDto();
+        update.setText("Updated comment"); // минимум 8 символов
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBasicAuth(author.getEmail(), authorPassword);
+        HttpEntity<CreateOrUpdateCommentDto> requestEntity = new HttpEntity<>(update, headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(
+                baseUrl() + "/ads/" + ad.getPk() + "/comments/999999",
+                HttpMethod.PATCH,
+                requestEntity,
+                String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 }

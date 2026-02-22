@@ -10,33 +10,29 @@ public interface UserService {
     /**
      * Получение информации о текущем пользователе.
      *
-     * @param email email (username) текущего пользователя
      * @return UserDto с данными пользователя
      */
-    UserDto getUser(String email);
+    UserDto getUser();
 
     /**
      * Обновление данных текущего пользователя (имя, фамилия, телефон).
      *
-     * @param email         email текущего пользователя
      * @param updateUserDto новые данные
      * @return обновлённые данные
      */
-    UpdateUserDto updateUser(String email, UpdateUserDto updateUserDto);
+    UpdateUserDto updateUser(UpdateUserDto updateUserDto);
 
     /**
      * Смена пароля текущего пользователя.
      *
-     * @param email          email текущего пользователя
      * @param newPasswordDto данные старого и нового пароля
      */
-    void setPassword(String email, NewPasswordDto newPasswordDto);
+    void setPassword(NewPasswordDto newPasswordDto);
 
     /**
      * Обновление аватара текущего пользователя.
      *
-     * @param email email текущего пользователя
      * @param image файл нового аватара
      */
-    void updateUserImage(String email, MultipartFile image);
+    void updateUserImage(MultipartFile image);
 }
