@@ -1,0 +1,149 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > CreateOrUpdateCommentDto</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">ru.skypro.homework.dto.comment</a>
+</div>
+
+<h1>Coverage Summary for Class: CreateOrUpdateCommentDto (ru.skypro.homework.dto.comment)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">CreateOrUpdateCommentDto</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package ru.skypro.homework.dto.comment;
+&nbsp;
+&nbsp;import static ru.skypro.homework.constants.ValidationConstants.COMMENT_TEXT_MAX_SIZE;
+&nbsp;import static ru.skypro.homework.constants.ValidationConstants.COMMENT_TEXT_MIN_SIZE;
+&nbsp;
+&nbsp;import io.swagger.v3.oas.annotations.media.Schema;
+&nbsp;
+&nbsp;import lombok.Data;
+&nbsp;
+&nbsp;import javax.validation.constraints.NotBlank;
+&nbsp;import javax.validation.constraints.Size;
+&nbsp;
+<b class="pc">&nbsp;@Data</b>
+&nbsp;@Schema(description = &quot;DTO для создания или обновления комментария&quot;)
+&nbsp;public class CreateOrUpdateCommentDto {
+&nbsp;
+&nbsp;    @Schema(
+&nbsp;            description = &quot;Текст комментария&quot;,
+&nbsp;            minLength = COMMENT_TEXT_MIN_SIZE,
+&nbsp;            maxLength = COMMENT_TEXT_MAX_SIZE,
+&nbsp;            example = &quot;Очень заинтересовало! 5.000 уступите?&quot;)
+&nbsp;    @NotBlank(message = &quot;Текст комментария не может быть пустым&quot;)
+&nbsp;    @Size(
+&nbsp;            min = COMMENT_TEXT_MIN_SIZE,
+&nbsp;            max = COMMENT_TEXT_MAX_SIZE,
+&nbsp;            message =
+&nbsp;                    &quot;Текст комментария должен содержать от &quot;
+&nbsp;                            + COMMENT_TEXT_MIN_SIZE
+&nbsp;                            + &quot; до &quot;
+&nbsp;                            + COMMENT_TEXT_MAX_SIZE
+&nbsp;                            + &quot; символов&quot;)
+<b class="fc">&nbsp;    private String text;</b>
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-02-22 23:22</div>
+</div>
+</body>
+</html>

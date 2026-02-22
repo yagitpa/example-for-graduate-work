@@ -1,0 +1,218 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > UserController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">ru.skypro.homework.controller.user</a>
+</div>
+
+<h1>Coverage Summary for Class: UserController (ru.skypro.homework.controller.user)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">UserController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (8/8)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">UserController$$EnhancerBySpringCGLIB$$31adc2e5</td>
+  </tr>
+  <tr>
+    <td class="name">UserController$$EnhancerBySpringCGLIB$$31adc2e5$$FastClassBySpringCGLIB$$c3ba6c1a</td>
+  </tr>
+  <tr>
+    <td class="name">UserController$$EnhancerBySpringCGLIB$$31adc2e5_2</td>
+  </tr>
+  <tr>
+    <td class="name">UserController$$FastClassBySpringCGLIB$$38781f5f</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (8/8)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package ru.skypro.homework.controller.user;
+&nbsp;
+&nbsp;import io.swagger.v3.oas.annotations.Operation;
+&nbsp;import io.swagger.v3.oas.annotations.media.Content;
+&nbsp;import io.swagger.v3.oas.annotations.media.Schema;
+&nbsp;import io.swagger.v3.oas.annotations.responses.ApiResponse;
+&nbsp;import io.swagger.v3.oas.annotations.responses.ApiResponses;
+&nbsp;import io.swagger.v3.oas.annotations.tags.Tag;
+&nbsp;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;
+&nbsp;import org.springframework.http.MediaType;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.validation.annotation.Validated;
+&nbsp;import org.springframework.web.bind.annotation.GetMapping;
+&nbsp;import org.springframework.web.bind.annotation.PatchMapping;
+&nbsp;import org.springframework.web.bind.annotation.PostMapping;
+&nbsp;import org.springframework.web.bind.annotation.RequestBody;
+&nbsp;import org.springframework.web.bind.annotation.RequestMapping;
+&nbsp;import org.springframework.web.bind.annotation.RequestParam;
+&nbsp;import org.springframework.web.bind.annotation.RestController;
+&nbsp;import org.springframework.web.multipart.MultipartFile;
+&nbsp;
+&nbsp;import ru.skypro.homework.dto.user.NewPasswordDto;
+&nbsp;import ru.skypro.homework.dto.user.UpdateUserDto;
+&nbsp;import ru.skypro.homework.dto.user.UserDto;
+&nbsp;import ru.skypro.homework.service.UserService;
+&nbsp;
+&nbsp;import javax.validation.Valid;
+&nbsp;
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;@Validated
+&nbsp;@RestController
+<b class="fc">&nbsp;@RequiredArgsConstructor</b>
+&nbsp;@RequestMapping(&quot;/users&quot;)
+&nbsp;@Tag(name = &quot;Пользователи&quot;, description = &quot;API для управления пользователями&quot;)
+&nbsp;public class UserController {
+&nbsp;
+&nbsp;    private final UserService userService;
+&nbsp;
+&nbsp;    @Operation(summary = &quot;Обновление пароля&quot;)
+&nbsp;    @ApiResponses(
+&nbsp;            value = {
+&nbsp;                @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Пароль успешно изменен&quot;),
+&nbsp;                @ApiResponse(responseCode = &quot;401&quot;, description = &quot;Пользователь не авторизован&quot;),
+&nbsp;                @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Текущий пароль указан неверно&quot;)
+&nbsp;            })
+&nbsp;    @PostMapping(&quot;/set_password&quot;)
+&nbsp;    public ResponseEntity&lt;Void&gt; setPassword(@Valid @RequestBody NewPasswordDto newPasswordDto) {
+<b class="fc">&nbsp;        userService.setPassword(newPasswordDto);</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok().build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Operation(summary = &quot;Получение информации об авторизованном пользователе&quot;)
+&nbsp;    @ApiResponses(
+&nbsp;            value = {
+&nbsp;                @ApiResponse(
+&nbsp;                        responseCode = &quot;200&quot;,
+&nbsp;                        description = &quot;Информация получена&quot;,
+&nbsp;                        content = @Content(schema = @Schema(implementation = UserDto.class))),
+&nbsp;                @ApiResponse(responseCode = &quot;401&quot;, description = &quot;Пользователь не авторизован&quot;)
+&nbsp;            })
+&nbsp;    @GetMapping(&quot;/me&quot;)
+&nbsp;    public ResponseEntity&lt;UserDto&gt; getUser() {
+<b class="fc">&nbsp;        return ResponseEntity.ok(userService.getUser());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Operation(summary = &quot;Обновление информации об авторизованном пользователе&quot;)
+&nbsp;    @ApiResponses(
+&nbsp;            value = {
+&nbsp;                @ApiResponse(
+&nbsp;                        responseCode = &quot;200&quot;,
+&nbsp;                        description = &quot;Информация обновлена&quot;,
+&nbsp;                        content = @Content(schema = @Schema(implementation = UpdateUserDto.class))),
+&nbsp;                @ApiResponse(responseCode = &quot;401&quot;, description = &quot;Пользователь не авторизован&quot;)
+&nbsp;            })
+&nbsp;    @PatchMapping(&quot;/me&quot;)
+&nbsp;    public ResponseEntity&lt;UpdateUserDto&gt; updateUser(
+&nbsp;            @Valid @RequestBody UpdateUserDto updateUserDto) {
+<b class="fc">&nbsp;        return ResponseEntity.ok(userService.updateUser(updateUserDto));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Operation(summary = &quot;Обновление аватара авторизованного пользователя&quot;)
+&nbsp;    @ApiResponses(
+&nbsp;            value = {
+&nbsp;                @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Аватар обновлен&quot;),
+&nbsp;                @ApiResponse(responseCode = &quot;401&quot;, description = &quot;Пользователь не авторизован&quot;)
+&nbsp;            })
+&nbsp;    @PatchMapping(value = &quot;/me/image&quot;, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+&nbsp;    public ResponseEntity&lt;Void&gt; updateUserImage(@RequestParam(&quot;image&quot;) MultipartFile image) {
+<b class="fc">&nbsp;        userService.updateUserImage(image);</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok().build();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-02-22 23:22</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,299 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > AdServiceImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">ru.skypro.homework.service.impl</a>
+</div>
+
+<h1>Coverage Summary for Class: AdServiceImpl (ru.skypro.homework.service.impl)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AdServiceImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (12/12)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    80%
+  </span>
+  <span class="absValue">
+    (8/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (59/59)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">AdServiceImpl$$EnhancerBySpringCGLIB$$732c963a</td>
+  </tr>
+  <tr>
+    <td class="name">AdServiceImpl$$EnhancerBySpringCGLIB$$732c963a$$FastClassBySpringCGLIB$$8c6e7a6d</td>
+  </tr>
+  <tr>
+    <td class="name">AdServiceImpl$$FastClassBySpringCGLIB$$81d0c884</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (12/12)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    80%
+  </span>
+  <span class="absValue">
+    (8/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (59/59)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package ru.skypro.homework.service.impl;
+&nbsp;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;
+&nbsp;import org.springframework.beans.factory.annotation.Value;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;import org.springframework.web.multipart.MultipartFile;
+&nbsp;
+&nbsp;import ru.skypro.homework.constants.ExceptionMessages;
+&nbsp;import ru.skypro.homework.constants.UrlPrefixConstants;
+&nbsp;import ru.skypro.homework.dto.ad.AdDto;
+&nbsp;import ru.skypro.homework.dto.ad.AdsDto;
+&nbsp;import ru.skypro.homework.dto.ad.CreateOrUpdateAdDto;
+&nbsp;import ru.skypro.homework.dto.ad.ExtendedAdDto;
+&nbsp;import ru.skypro.homework.dto.auth.Role;
+&nbsp;import ru.skypro.homework.exception.AdNotFoundException;
+&nbsp;import ru.skypro.homework.exception.UnauthorizedAccessException;
+&nbsp;import ru.skypro.homework.mapper.AdMapper;
+&nbsp;import ru.skypro.homework.model.AdsDao;
+&nbsp;import ru.skypro.homework.model.UsersDao;
+&nbsp;import ru.skypro.homework.repository.AdRepository;
+&nbsp;import ru.skypro.homework.service.AdService;
+&nbsp;import ru.skypro.homework.service.CurrentUserService;
+&nbsp;import ru.skypro.homework.service.ImageService;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;/**
+&nbsp; * Реализация сервиса {@link AdService}. Обеспечивает CRUD-операции с объявлениями, проверку прав
+&nbsp; * доступа (автор или администратор) и управление изображениями через {@link ImageService}.
+&nbsp; *
+&nbsp; * @see AdService
+&nbsp; * @see AdRepository
+&nbsp; * @see AdMapper
+&nbsp; * @see CurrentUserService
+&nbsp; * @see ImageService
+&nbsp; */
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;@Service
+<b class="fc">&nbsp;@RequiredArgsConstructor</b>
+&nbsp;@Transactional
+&nbsp;public class AdServiceImpl implements AdService {
+&nbsp;
+&nbsp;    private final AdRepository adRepository;
+&nbsp;    private final AdMapper adMapper;
+&nbsp;
+&nbsp;    private final CurrentUserService currentUserService;
+&nbsp;    private final ImageService imageService;
+&nbsp;
+&nbsp;    @Value(&quot;${app.image.ad-dir}&quot;)
+&nbsp;    private String adImageDir;
+&nbsp;
+&nbsp;    @Override
+&nbsp;    @Transactional(readOnly = true)
+&nbsp;    public AdsDto getAllAds() {
+<b class="fc">&nbsp;        List&lt;AdsDao&gt; ads = adRepository.findAll();</b>
+<b class="fc">&nbsp;        List&lt;AdDto&gt; adDtos = ads.stream().map(adMapper::toAdDto).collect(Collectors.toList());</b>
+<b class="fc">&nbsp;        AdsDto result = new AdsDto();</b>
+<b class="fc">&nbsp;        result.setCount(adDtos.size());</b>
+<b class="fc">&nbsp;        result.setResults(adDtos);</b>
+<b class="fc">&nbsp;        return result;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public AdDto addAd(String email, CreateOrUpdateAdDto properties, MultipartFile image) {
+<b class="fc">&nbsp;        UsersDao author = currentUserService.getUserByEmail(email);</b>
+<b class="fc">&nbsp;        String imagePath =</b>
+<b class="fc">&nbsp;                imageService.saveImage(image, adImageDir, UrlPrefixConstants.URL_PREFIX_ADS_IMAGES);</b>
+&nbsp;
+<b class="fc">&nbsp;        AdsDao ad = adMapper.toAdEntity(properties);</b>
+<b class="fc">&nbsp;        ad.setAuthor(author);</b>
+<b class="fc">&nbsp;        ad.setImage(imagePath);</b>
+<b class="fc">&nbsp;        AdsDao savedAd = adRepository.save(ad);</b>
+&nbsp;
+<b class="fc">&nbsp;        log.info(&quot;Ad created with id: {} by user: {}&quot;, savedAd.getPk(), email);</b>
+<b class="fc">&nbsp;        return adMapper.toAdDto(savedAd);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    @Transactional(readOnly = true)
+&nbsp;    public ExtendedAdDto getAd(Integer id) {
+<b class="fc">&nbsp;        AdsDao ad = getAdById(id);</b>
+<b class="fc">&nbsp;        return adMapper.toExtendedAdDto(ad);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void removeAd(Integer id, String email) {
+<b class="fc">&nbsp;        AdsDao ad = getAdById(id);</b>
+<b class="fc">&nbsp;        checkPermissions(ad, email);</b>
+&nbsp;
+<b class="pc">&nbsp;        if (ad.getImage() != null) {</b>
+<b class="fc">&nbsp;            imageService.deleteImage(ad.getImage(), adImageDir);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        adRepository.delete(ad);</b>
+<b class="fc">&nbsp;        log.info(&quot;Ad deleted with id: {} by user: {}&quot;, id, email);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public AdDto updateAd(Integer id, String email, CreateOrUpdateAdDto updateAd) {
+<b class="fc">&nbsp;        AdsDao ad = getAdById(id);</b>
+<b class="fc">&nbsp;        checkPermissions(ad, email);</b>
+<b class="fc">&nbsp;        adMapper.updateAdFromDto(updateAd, ad);</b>
+<b class="fc">&nbsp;        AdsDao updatedAd = adRepository.save(ad);</b>
+<b class="fc">&nbsp;        log.info(&quot;Ad updated with id: {} by user: {}&quot;, id, email);</b>
+<b class="fc">&nbsp;        return adMapper.toAdDto(updatedAd);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    @Transactional(readOnly = true)
+&nbsp;    public AdsDto getAdsMe() {
+<b class="fc">&nbsp;        UsersDao author = currentUserService.getCurrentUser(); // получаем текущего пользователя</b>
+<b class="fc">&nbsp;        List&lt;AdsDao&gt; ads = adRepository.findByAuthorId(author.getId());</b>
+<b class="fc">&nbsp;        List&lt;AdDto&gt; adDtos = ads.stream().map(adMapper::toAdDto).collect(Collectors.toList());</b>
+<b class="fc">&nbsp;        AdsDto result = new AdsDto();</b>
+<b class="fc">&nbsp;        result.setCount(adDtos.size());</b>
+<b class="fc">&nbsp;        result.setResults(adDtos);</b>
+<b class="fc">&nbsp;        return result;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public byte[] updateImage(Integer id, String email, MultipartFile image) {
+<b class="fc">&nbsp;        AdsDao ad = getAdById(id);</b>
+<b class="fc">&nbsp;        checkPermissions(ad, email);</b>
+&nbsp;
+<b class="fc">&nbsp;        String newImagePath =</b>
+<b class="fc">&nbsp;                imageService.saveImage(image, adImageDir, UrlPrefixConstants.URL_PREFIX_ADS_IMAGES);</b>
+<b class="pc">&nbsp;        if (ad.getImage() != null) {</b>
+<b class="fc">&nbsp;            imageService.deleteImage(ad.getImage(), adImageDir);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        ad.setImage(newImagePath);</b>
+<b class="fc">&nbsp;        adRepository.save(ad);</b>
+<b class="fc">&nbsp;        log.info(&quot;Image updated for ad id: {} by user: {}&quot;, id, email);</b>
+&nbsp;
+<b class="fc">&nbsp;        return imageService.readImageAsBytes(newImagePath, adImageDir);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private AdsDao getAdById(Integer id) {
+<b class="fc">&nbsp;        return adRepository</b>
+<b class="fc">&nbsp;                .findById(id)</b>
+<b class="fc">&nbsp;                .orElseThrow(</b>
+&nbsp;                        () -&gt;
+<b class="fc">&nbsp;                                new AdNotFoundException(</b>
+<b class="fc">&nbsp;                                        String.format(ExceptionMessages.AD_NOT_FOUND, id)));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void checkPermissions(AdsDao ad, String email) {
+<b class="fc">&nbsp;        UsersDao user = currentUserService.getUserByEmail(email);</b>
+<b class="fc">&nbsp;        boolean isAuthor = ad.getAuthor().getId().equals(user.getId());</b>
+<b class="fc">&nbsp;        boolean isAdmin = user.getRole() == Role.ADMIN;</b>
+<b class="fc">&nbsp;        if (!isAuthor &amp;&amp; !isAdmin) {</b>
+<b class="fc">&nbsp;            throw new UnauthorizedAccessException(</b>
+<b class="fc">&nbsp;                    String.format(ExceptionMessages.UNAUTHORIZED_ACCESS, &quot;ad&quot;));</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-02-22 23:22</div>
+</div>
+</body>
+</html>

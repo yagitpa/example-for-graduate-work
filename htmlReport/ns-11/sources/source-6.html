@@ -1,0 +1,97 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > AuthService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">ru.skypro.homework.service</a>
+</div>
+
+<h1>Coverage Summary for Class: AuthService (ru.skypro.homework.service)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">AuthService</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package ru.skypro.homework.service;
+&nbsp;
+&nbsp;import ru.skypro.homework.dto.auth.RegisterDto;
+&nbsp;
+&nbsp;/**
+&nbsp; * Сервис аутентификации и регистрации пользователей. Предоставляет методы для входа в систему и
+&nbsp; * регистрации новых пользователей.
+&nbsp; */
+&nbsp;public interface AuthService {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Аутентификация пользователя.
+&nbsp;     *
+&nbsp;     * @param userName логин (email)
+&nbsp;     * @param password пароль
+&nbsp;     * @throws org.springframework.security.authentication.BadCredentialsException если неверные
+&nbsp;     *     учетные данные
+&nbsp;     */
+&nbsp;    void login(String userName, String password);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Регистрация нового пользователя.
+&nbsp;     *
+&nbsp;     * @param registerDto данные регистрации
+&nbsp;     * @throws ru.skypro.homework.exception.UserAlreadyExistsException если пользователь с таким
+&nbsp;     *     email уже существует
+&nbsp;     */
+&nbsp;    void register(RegisterDto registerDto);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-02-22 23:22</div>
+</div>
+</body>
+</html>
