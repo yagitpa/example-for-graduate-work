@@ -105,8 +105,8 @@ public class AdServiceImpl implements AdService {
 
     @Override
     @Transactional(readOnly = true)
-    public AdsDto getAdsMe(String email) {
-        UsersDao author = currentUserService.getUserByEmail(email);
+    public AdsDto getAdsMe() {
+        UsersDao author = currentUserService.getCurrentUser(); // получаем текущего пользователя
         List<AdsDao> ads = adRepository.findByAuthorId(author.getId());
         List<AdDto> adDtos = ads.stream()
                                 .map(adMapper::toAdDto)

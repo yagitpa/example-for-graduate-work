@@ -44,11 +44,8 @@ public class UserController {
             @ApiResponse(responseCode = "403", description = "Текущий пароль указан неверно")
     })
     @PostMapping("/set_password")
-    public ResponseEntity<Void> setPassword(
-            @Valid @RequestBody NewPasswordDto newPasswordDto,
-            Authentication authentication) {
-        String email = authentication.getName();
-        userService.setPassword(email, newPasswordDto);
+    public ResponseEntity<Void> setPassword(@Valid @RequestBody NewPasswordDto newPasswordDto) {
+        userService.setPassword(newPasswordDto);
         return ResponseEntity.ok().build();
     }
 
@@ -59,9 +56,8 @@ public class UserController {
             @ApiResponse(responseCode = "401", description = "Пользователь не авторизован")
     })
     @GetMapping("/me")
-    public ResponseEntity<UserDto> getUser(Authentication authentication) {
-        String email = authentication.getName();
-        return ResponseEntity.ok(userService.getUser(email));
+    public ResponseEntity<UserDto> getUser() {
+        return ResponseEntity.ok(userService.getUser());
     }
 
     @Operation(summary = "Обновление информации об авторизованном пользователе")
@@ -71,11 +67,8 @@ public class UserController {
             @ApiResponse(responseCode = "401", description = "Пользователь не авторизован")
     })
     @PatchMapping("/me")
-    public ResponseEntity<UpdateUserDto> updateUser(
-            @Valid @RequestBody UpdateUserDto updateUserDto,
-            Authentication authentication) {
-        String email = authentication.getName();
-        return ResponseEntity.ok(userService.updateUser(email, updateUserDto));
+    public ResponseEntity<UpdateUserDto> updateUser(@Valid @RequestBody UpdateUserDto updateUserDto) {
+        return ResponseEntity.ok(userService.updateUser(updateUserDto));
     }
 
     @Operation(summary = "Обновление аватара авторизованного пользователя")
@@ -84,11 +77,8 @@ public class UserController {
             @ApiResponse(responseCode = "401", description = "Пользователь не авторизован")
     })
     @PatchMapping(value = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Void> updateUserImage(
-            @RequestParam("image") MultipartFile image,
-            Authentication authentication) {
-        String email = authentication.getName();
-        userService.updateUserImage(email, image);
+    public ResponseEntity<Void> updateUserImage(@RequestParam("image") MultipartFile image) {
+        userService.updateUserImage(image);
         return ResponseEntity.ok().build();
     }
 }

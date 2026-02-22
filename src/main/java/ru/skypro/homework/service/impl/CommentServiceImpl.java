@@ -52,8 +52,8 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public CommentDto addComment(Integer adId, String email, CreateOrUpdateCommentDto createComment) {
-        UsersDao author = currentUserService.getUserByEmail(email);
+    public CommentDto addComment(Integer adId, CreateOrUpdateCommentDto createComment) {
+        UsersDao author = currentUserService.getCurrentUser();
         AdsDao ad = getAdById(adId);
 
         CommentsDao comment = commentMapper.toCommentEntity(createComment);
@@ -61,25 +61,27 @@ public class CommentServiceImpl implements CommentService {
         comment.setAd(ad);
         CommentsDao savedComment = commentRepository.save(comment);
 
-        log.info("Comment added with id: {} to ad: {} by user: {}", savedComment.getPk(), adId, email);
+        log.info("Comment added with id: {} to ad: {} by user: {}", savedComment.getPk(), adId, author.getEmail());
         return commentMapper.toCommentDto(savedComment);
     }
 
     @Override
-    public void deleteComment(Integer adId, Integer commentId, String email) {
+    public void deleteComment(Integer adId, Integer commentId) {
+        UsersDao currentUser = currentUserService.getCurrentUser();
         CommentsDao comment = getCommentByIdAndAdId(commentId, adId);
-        checkPermissions(comment, email);
+        checkPermissions(comment, currentUser);
         commentRepository.delete(comment);
-        log.info("Comment deleted with id: {} from ad: {} by user: {}", commentId, adId, email);
+        log.info("Comment deleted with id: {} from ad: {} by user: {}", commentId, adId, currentUser.getEmail());
     }
 
     @Override
-    public CommentDto updateComment(Integer adId, Integer commentId, String email, CreateOrUpdateCommentDto updateComment) {
+    public CommentDto updateComment(Integer adId, Integer commentId, CreateOrUpdateCommentDto updateComment) {
+        UsersDao currentUser = currentUserService.getCurrentUser();
         CommentsDao comment = getCommentByIdAndAdId(commentId, adId);
-        checkPermissions(comment, email);
+        checkPermissions(comment, currentUser);
         commentMapper.updateCommentFromDto(updateComment, comment);
         CommentsDao updatedComment = commentRepository.save(comment);
-        log.info("Comment updated with id: {} in ad: {} by user: {}", commentId, adId, email);
+        log.info("Comment updated with id: {} in ad: {} by user: {}", commentId, adId, currentUser.getEmail());
         return commentMapper.toCommentDto(updatedComment);
     }
 
@@ -94,8 +96,7 @@ public class CommentServiceImpl implements CommentService {
                                         String.format("Comment with id %d not found for ad id %d", commentId, adId)));
     }
 
-    private void checkPermissions(CommentsDao comment, String email) {
-        UsersDao user = currentUserService.getUserByEmail(email);
+    private void checkPermissions(CommentsDao comment, UsersDao user) {
         boolean isAuthor = comment.getAuthor().getId().equals(user.getId());
         boolean isAdmin = user.getRole() == Role.ADMIN;
         if (!isAuthor && !isAdmin) {

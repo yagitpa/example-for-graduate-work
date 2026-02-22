@@ -52,10 +52,8 @@ public class CommentController {
     @PostMapping("/{adId}/comments")
     public ResponseEntity<CommentDto> addComment(
             @PathVariable Integer adId,
-            @Valid @RequestBody CreateOrUpdateCommentDto createComment,
-            Authentication authentication) {
-        String email = authentication.getName();
-        return ResponseEntity.ok(commentService.addComment(adId, email, createComment));
+            @Valid @RequestBody CreateOrUpdateCommentDto createComment) {
+        return ResponseEntity.ok(commentService.addComment(adId, createComment));
     }
 
     @Operation(summary = "Удаление комментария")
@@ -68,10 +66,8 @@ public class CommentController {
     @DeleteMapping("/{adId}/comments/{commentId}")
     public ResponseEntity<Void> deleteComment(
             @PathVariable Integer adId,
-            @PathVariable Integer commentId,
-            Authentication authentication) {
-        String email = authentication.getName();
-        commentService.deleteComment(adId, commentId, email);
+            @PathVariable Integer commentId) {
+        commentService.deleteComment(adId, commentId);
         return ResponseEntity.ok().build();
     }
 
@@ -87,9 +83,7 @@ public class CommentController {
     public ResponseEntity<CommentDto> updateComment(
             @PathVariable Integer adId,
             @PathVariable Integer commentId,
-            @Valid @RequestBody CreateOrUpdateCommentDto updateComment,
-            Authentication authentication) {
-        String email = authentication.getName();
-        return ResponseEntity.ok(commentService.updateComment(adId, commentId, email, updateComment));
+            @Valid @RequestBody CreateOrUpdateCommentDto updateComment) {
+        return ResponseEntity.ok(commentService.updateComment(adId, commentId, updateComment));
     }
 }
