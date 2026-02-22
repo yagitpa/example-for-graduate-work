@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.skypro.homework.exception.AdNotFoundException;
 import ru.skypro.homework.exception.CommentNotFoundException;
+import ru.skypro.homework.exception.ImageNotFoundException;
+import ru.skypro.homework.exception.ImageReadException;
 import ru.skypro.homework.exception.InvalidCurrentPasswordException;
 import ru.skypro.homework.exception.UnauthorizedAccessException;
 import ru.skypro.homework.exception.UserAlreadyExistsException;
@@ -85,6 +87,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<?> handleAccessDenied(AccessDeniedException e) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+
+    @ExceptionHandler(ImageNotFoundException.class)
+    public ResponseEntity<?> handleImageNotFound(ImageNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    }
+
+    @ExceptionHandler(ImageReadException.class)
+    public ResponseEntity<?> handleImageRead(ImageReadException e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
     }
 
     @Data
