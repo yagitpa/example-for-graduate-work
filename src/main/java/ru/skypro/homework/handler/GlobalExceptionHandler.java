@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -79,6 +80,11 @@ public class GlobalExceptionHandler {
         ValidationErrorResponse response = new ValidationErrorResponse(Instant.now().toString(), HttpStatus.BAD_REQUEST.value(),
                 "Validation failed", violations);
         return ResponseEntity.badRequest().body(response);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<?> handleAccessDenied(AccessDeniedException e) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
     @Data
