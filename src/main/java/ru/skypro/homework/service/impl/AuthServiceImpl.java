@@ -9,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import ru.skypro.homework.constants.ExceptionMessages;
 import ru.skypro.homework.dto.auth.RegisterDto;
 import ru.skypro.homework.exception.UserAlreadyExistsException;
 import ru.skypro.homework.mapper.UserMapper;
@@ -16,6 +17,17 @@ import ru.skypro.homework.model.UsersDao;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.AuthService;
 
+/**
+ * Реализация сервиса {@link AuthService}.
+ * Использует {@link AuthenticationManager} для аутентификации,
+ * {@link UserRepository} для проверки существования пользователя,
+ * {@link PasswordEncoder} для шифрования пароля при регистрации.
+ *
+ * @see AuthService
+ * @see UserRepository
+ * @see PasswordEncoder
+ * @see UserMapper
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -44,7 +56,7 @@ public class AuthServiceImpl implements AuthService {
     public void register(RegisterDto registerDto) {
         if (userRepository.existsByEmail(registerDto.getUsername())) {
             log.warn("Registration failed: user {} already exists", registerDto.getUsername());
-            throw new UserAlreadyExistsException("User with email " + registerDto.getUsername() + " already exists");
+            throw new UserAlreadyExistsException(String.format(ExceptionMessages.USER_ALREADY_EXISTS, registerDto.getUsername()));
         }
         UsersDao user = userMapper.toUserEntity(registerDto);
         user.setPassword(passwordEncoder.encode(registerDto.getPassword()));

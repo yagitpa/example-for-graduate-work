@@ -8,15 +8,25 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import ru.skypro.homework.constants.ExceptionMessages;
 import ru.skypro.homework.exception.ImageNotFoundException;
 import ru.skypro.homework.exception.ImageReadException;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 
+/**
+ * Сервис для работы с изображениями.
+ * Обеспечивает сохранение, удаление, чтение файлов изображений,
+ * а также загрузку их с определением MIME-типа.
+ * <p>
+ * При ошибках ввода-вывода выбрасывает {@link ImageReadException},
+ * при отсутствии файла – {@link ImageNotFoundException}.
+ */
 @Getter
 @Slf4j
 @Service
@@ -35,6 +45,12 @@ public class ImageService {
 
     public ImageData loadAvatar(String filename) {
         return loadImage(filename, avatarDir);
+    }
+
+    @PostConstruct
+    public void init() {
+        createDirectoryIfNotExists(avatarDir);
+        createDirectoryIfNotExists(adImageDir);
     }
 
     /**
@@ -58,7 +74,7 @@ public class ImageService {
             return urlPrefix + filename;
         } catch (IOException e) {
             log.error("Failed to save image to {}", directory, e);
-            throw new RuntimeException("Failed to save image", e);
+            throw new RuntimeException(ExceptionMessages.IMAGE_FAILED_TO_SAVE, e);
         }
     }
 
@@ -91,7 +107,7 @@ public class ImageService {
             return Files.readAllBytes(fullPath);
         } catch (IOException e) {
             log.error("Failed to read image file: {}", imagePath, e);
-            throw new RuntimeException("Failed to read image file", e);
+            throw new RuntimeException(String.format(ExceptionMessages.IMAGE_FAILED_TO_READ, imagePath), e);
         }
     }
 
@@ -108,7 +124,7 @@ public class ImageService {
         try {
             Path path = Paths.get(directory, filename);
             if (!Files.exists(path)) {
-                throw new ImageNotFoundException("Image not found: " + filename);
+                throw new ImageNotFoundException(String.format(ExceptionMessages.IMAGE_NOT_FOUND, filename));
             }
             byte[] content = Files.readAllBytes(path);
             String contentType = Files.probeContentType(path);
@@ -117,7 +133,7 @@ public class ImageService {
             }
             return new ImageData(content, contentType);
         } catch (IOException e) {
-            throw new ImageReadException("Failed to read image: " + filename, e);
+            throw new ImageReadException(String.format(ExceptionMessages.IMAGE_FAILED_TO_READ, filename), e);
         }
     }
 
@@ -126,6 +142,18 @@ public class ImageService {
             return "";
         }
         return filename.substring(filename.lastIndexOf("."));
+    }
+
+    private void createDirectoryIfNotExists(String dir) {
+        Path path = Paths.get(dir);
+        if (!Files.exists(path)) {
+            try {
+                Files.createDirectories(path);
+                log.info("Created directory: {}", path.toAbsolutePath());
+            } catch (IOException e) {
+                log.error("Failed to create directory: {}", path.toAbsolutePath(), e);
+            }
+        }
     }
 
     /**

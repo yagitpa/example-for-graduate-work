@@ -7,6 +7,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import ru.skypro.homework.constants.ExceptionMessages;
+import ru.skypro.homework.constants.UrlPrefixConstants;
 import ru.skypro.homework.dto.user.NewPasswordDto;
 import ru.skypro.homework.dto.user.UpdateUserDto;
 import ru.skypro.homework.dto.user.UserDto;
@@ -18,6 +20,19 @@ import ru.skypro.homework.service.CurrentUserService;
 import ru.skypro.homework.service.ImageService;
 import ru.skypro.homework.service.UserService;
 
+/**
+ * Реализация сервиса {@link UserService}.
+ * Использует {@link UserRepository} для доступа к данным пользователей,
+ * {@link PasswordEncoder} для шифрования паролей,
+ * {@link CurrentUserService} для получения текущего аутентифицированного пользователя,
+ * {@link ImageService} для сохранения и удаления аватаров.
+ *
+ * @see UserService
+ * @see UserRepository
+ * @see UserMapper
+ * @see CurrentUserService
+ * @see ImageService
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -52,7 +67,7 @@ public class UserServiceImpl implements UserService {
     public void setPassword(NewPasswordDto newPasswordDto) {
         UsersDao user = currentUserService.getCurrentUser();
         if (!passwordEncoder.matches(newPasswordDto.getCurrentPassword(), user.getPassword())) {
-            throw new InvalidCurrentPasswordException("Current password is incorrect");
+            throw new InvalidCurrentPasswordException(ExceptionMessages.INVALID_CURRENT_PASSWORD);
         }
         user.setPassword(passwordEncoder.encode(newPasswordDto.getNewPassword()));
         userRepository.save(user);
@@ -62,7 +77,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void updateUserImage(MultipartFile image) {
         UsersDao user = currentUserService.getCurrentUser();
-        String newImagePath = imageService.saveImage(image, avatarDir, "/avatars/");
+        String newImagePath = imageService.saveImage(image, avatarDir, UrlPrefixConstants.URL_PREFIX_AVATARS);
         if (user.getImage() != null) {
             imageService.deleteImage(user.getImage(), avatarDir);
         }

@@ -3,6 +3,7 @@ package ru.skypro.homework.handler;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -25,31 +26,37 @@ import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<?> handleUserNotFound(UserNotFoundException e) {
+        log.error("User not found: {}", e.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
 
     @ExceptionHandler(InvalidCurrentPasswordException.class)
     public ResponseEntity<?> handleInvalidPassword(InvalidCurrentPasswordException e) {
+        log.error("Invalid current password: {}", e.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
 
     @ExceptionHandler(AdNotFoundException.class)
     public ResponseEntity<?> handleAdNotFound(AdNotFoundException e) {
+        log.error("Ad not found: {}", e.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
 
     @ExceptionHandler(UnauthorizedAccessException.class)
     public ResponseEntity<?> handleUnauthorizedAccess(UnauthorizedAccessException e) {
+        log.error("Unauthorized Access detected: {}", e.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
     }
 
     @ExceptionHandler(CommentNotFoundException.class)
     public ResponseEntity<?> handleCommentNotFound(CommentNotFoundException e) {
+        log.error("Comment not found: {}", e.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
 
@@ -60,6 +67,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UserAlreadyExistsException.class)
     public ResponseEntity<?> handleUserAlreadyExists(UserAlreadyExistsException e) {
+        log.error("User already exists: {}", e.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
 
@@ -68,6 +76,7 @@ public class GlobalExceptionHandler {
         List<Violation> violations = ex.getBindingResult().getFieldErrors().stream()
                                        .map(error -> new Violation(error.getField(), error.getDefaultMessage()))
                                        .collect(Collectors.toList());
+        log.error("Method argument not valid: {}", violations);
         return buildValidationErrorResponse(violations);
     }
 
@@ -76,12 +85,14 @@ public class GlobalExceptionHandler {
         List<Violation> violations = ex.getConstraintViolations().stream()
                                        .map(violation -> new Violation(violation.getPropertyPath().toString(), violation.getMessage()))
                                        .collect(Collectors.toList());
+        log.error("Constraint violation {}", violations);
         return buildValidationErrorResponse(violations);
     }
 
     private ResponseEntity<ValidationErrorResponse> buildValidationErrorResponse(List<Violation> violations) {
         ValidationErrorResponse response = new ValidationErrorResponse(Instant.now().toString(), HttpStatus.BAD_REQUEST.value(),
                 "Validation failed", violations);
+        log.error("Validation failed {}", violations);
         return ResponseEntity.badRequest().body(response);
     }
 
@@ -92,11 +103,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ImageNotFoundException.class)
     public ResponseEntity<?> handleImageNotFound(ImageNotFoundException e) {
+        log.error("Image not found: {}", e.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
 
     @ExceptionHandler(ImageReadException.class)
     public ResponseEntity<?> handleImageRead(ImageReadException e) {
+        log.error("Image read error: {}", e.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
     }
 

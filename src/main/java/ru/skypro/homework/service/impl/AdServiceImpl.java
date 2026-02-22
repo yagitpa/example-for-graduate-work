@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import ru.skypro.homework.constants.ExceptionMessages;
+import ru.skypro.homework.constants.UrlPrefixConstants;
 import ru.skypro.homework.dto.ad.AdDto;
 import ru.skypro.homework.dto.ad.AdsDto;
 import ru.skypro.homework.dto.ad.CreateOrUpdateAdDto;
@@ -13,25 +15,28 @@ import ru.skypro.homework.dto.ad.ExtendedAdDto;
 import ru.skypro.homework.dto.auth.Role;
 import ru.skypro.homework.exception.AdNotFoundException;
 import ru.skypro.homework.exception.UnauthorizedAccessException;
-import ru.skypro.homework.exception.UserNotFoundException;
 import ru.skypro.homework.mapper.AdMapper;
 import ru.skypro.homework.model.AdsDao;
 import ru.skypro.homework.model.UsersDao;
 import ru.skypro.homework.repository.AdRepository;
-import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.AdService;
 import ru.skypro.homework.service.CurrentUserService;
 import ru.skypro.homework.service.ImageService;
-import ru.skypro.homework.util.ImageHelper;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * Реализация сервиса {@link AdService}.
+ * Обеспечивает CRUD-операции с объявлениями, проверку прав доступа
+ * (автор или администратор) и управление изображениями через {@link ImageService}.
+ *
+ * @see AdService
+ * @see AdRepository
+ * @see AdMapper
+ * @see CurrentUserService
+ * @see ImageService
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -63,7 +68,7 @@ public class AdServiceImpl implements AdService {
     @Override
     public AdDto addAd(String email, CreateOrUpdateAdDto properties, MultipartFile image) {
         UsersDao author = currentUserService.getUserByEmail(email);
-        String imagePath = imageService.saveImage(image, adImageDir, "/ads-images/");
+        String imagePath = imageService.saveImage(image, adImageDir, UrlPrefixConstants.URL_PREFIX_ADS_IMAGES);
 
         AdsDao ad = adMapper.toAdEntity(properties);
         ad.setAuthor(author);
@@ -122,7 +127,7 @@ public class AdServiceImpl implements AdService {
         AdsDao ad = getAdById(id);
         checkPermissions(ad, email);
 
-        String newImagePath = imageService.saveImage(image, adImageDir, "/ads-images/");
+        String newImagePath = imageService.saveImage(image, adImageDir, UrlPrefixConstants.URL_PREFIX_ADS_IMAGES);
         if (ad.getImage() != null) {
             imageService.deleteImage(ad.getImage(), adImageDir);
         }
@@ -136,7 +141,7 @@ public class AdServiceImpl implements AdService {
 
     private AdsDao getAdById(Integer id) {
         return adRepository.findById(id)
-                           .orElseThrow(() -> new AdNotFoundException("Ad not found with id: " + id));
+                           .orElseThrow(() -> new AdNotFoundException(String.format(ExceptionMessages.AD_NOT_FOUND, id)));
     }
 
     private void checkPermissions(AdsDao ad, String email) {
@@ -144,7 +149,7 @@ public class AdServiceImpl implements AdService {
         boolean isAuthor = ad.getAuthor().getId().equals(user.getId());
         boolean isAdmin = user.getRole() == Role.ADMIN;
         if (!isAuthor && !isAdmin) {
-            throw new UnauthorizedAccessException("User does not have permission to modify this ad");
+            throw new UnauthorizedAccessException(String.format(ExceptionMessages.UNAUTHORIZED_ACCESS, "ad"));
         }
     }
 }
