@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.skypro.homework.constants.ExceptionMessages;
 import ru.skypro.homework.dto.auth.Role;
 import ru.skypro.homework.dto.comment.CommentDto;
 import ru.skypro.homework.dto.comment.CommentsDto;
@@ -23,6 +24,17 @@ import ru.skypro.homework.service.CurrentUserService;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Реализация сервиса {@link CommentService}.
+ * Обеспечивает операции с комментариями, включая проверку прав доступа
+ * (автор комментария или администратор).
+ *
+ * @see CommentService
+ * @see CommentRepository
+ * @see AdRepository
+ * @see CommentMapper
+ * @see CurrentUserService
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -39,7 +51,7 @@ public class CommentServiceImpl implements CommentService {
     @Transactional(readOnly = true)
     public CommentsDto getComments(Integer adId) {
         if (!adRepository.existsById(adId)) {
-            throw new AdNotFoundException("Ad not found with id: " + adId);
+            throw new AdNotFoundException(String.format(ExceptionMessages.AD_NOT_FOUND, adId));
         }
         List<CommentsDao> comments = commentRepository.findByAdPkOrderByCreatedAtDesc(adId);
         List<CommentDto> commentDtos = comments.stream()
@@ -87,20 +99,20 @@ public class CommentServiceImpl implements CommentService {
 
     private AdsDao getAdById(Integer adId) {
         return adRepository.findById(adId)
-                           .orElseThrow(() -> new AdNotFoundException("Ad not found with id: " + adId));
+                           .orElseThrow(() -> new AdNotFoundException(String.format(ExceptionMessages.AD_NOT_FOUND, adId)));
     }
 
     private CommentsDao getCommentByIdAndAdId(Integer commentId, Integer adId) {
         return commentRepository.findByPkAndAdPk(commentId, adId)
                                 .orElseThrow(() -> new CommentNotFoundException(
-                                        String.format("Comment with id %d not found for ad id %d", commentId, adId)));
+                                        String.format(String.format(ExceptionMessages.COMMENT_NOT_FOUND, commentId, adId))));
     }
 
     private void checkPermissions(CommentsDao comment, UsersDao user) {
         boolean isAuthor = comment.getAuthor().getId().equals(user.getId());
         boolean isAdmin = user.getRole() == Role.ADMIN;
         if (!isAuthor && !isAdmin) {
-            throw new UnauthorizedAccessException("User does not have permission to modify this comment");
+            throw new UnauthorizedAccessException(String.format(ExceptionMessages.UNAUTHORIZED_ACCESS, "comment"));
         }
     }
 }

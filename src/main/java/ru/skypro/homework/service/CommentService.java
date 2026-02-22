@@ -4,6 +4,10 @@ import ru.skypro.homework.dto.comment.CommentDto;
 import ru.skypro.homework.dto.comment.CommentsDto;
 import ru.skypro.homework.dto.comment.CreateOrUpdateCommentDto;
 
+/**
+ * Сервис для работы с комментариями к объявлениям.
+ * Содержит методы для получения, добавления, обновления и удаления комментариев.
+ */
 public interface CommentService {
 
     /**

@@ -1,6 +1,7 @@
 package ru.skypro.homework.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -9,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.skypro.homework.constants.ExceptionMessages;
 import ru.skypro.homework.exception.InvalidCurrentPasswordException;
 import ru.skypro.homework.exception.UserNotFoundException;
 import ru.skypro.homework.model.UsersDao;
@@ -18,32 +20,15 @@ import ru.skypro.homework.repository.UserRepository;
  * Кастомная реализация {@link UserDetailsManager}, обеспечивающая хранение и управление
  * пользователями в базе данных через {@link UserRepository}.
  * <p>
- * Используется вместо стандартного InMemoryUserDetailsManager для аутентификации
- * и авторизации на основе данных из БД. Предоставляет полный набор операций
- * управления пользователями:
- * <ul>
- *   <li>загрузка пользователя по имени (email) – {@link #loadUserByUsername(String)}</li>
- *   <li>создание нового пользователя – {@link #createUser(UserDetails)}</li>
- *   <li>обновление существующего – {@link #updateUser(UserDetails)}</li>
- *   <li>удаление – {@link #deleteUser(String)}</li>
- *   <li>смена пароля – {@link #changePassword(String, String)}</li>
- *   <li>проверка существования – {@link #userExists(String)}</li>
- * </ul>
- * <p>
- * В текущей реализации методы createUser, updateUser не используются напрямую,
- * так как регистрация выполняется через {@link ru.skypro.homework.service.AuthService}
- * с сохранением полной информации о пользователе (имя, фамилия, телефон). Однако они
- * оставлены для возможного расширения и соответствия контракту интерфейса.
- * <p>
- * Метод {@link #changePassword(String, String)} предназначен для смены пароля
- * аутентифицированным пользователем: он получает текущего пользователя из
- * контекста безопасности, проверяет старый пароль с помощью {@link PasswordEncoder}
- * и сохраняет новый зашифрованный пароль.
+ * Используется для аутентификации и авторизации на основе данных из БД.
+ * Предоставляет полный набор операций управления пользователями:
+ * загрузка, создание, обновление, удаление, смена пароля, проверка существования.
  *
  * @see UserDetailsManager
  * @see UserRepository
  * @see PasswordEncoder
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -62,7 +47,7 @@ public class DatabaseUserDetailsManager implements UserDetailsManager {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         UsersDao user = userRepository.findByEmail(username)
-                                      .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+                                      .orElseThrow(() -> new UsernameNotFoundException(String.format(ExceptionMessages.USER_NOT_FOUND, username)));
         return User.builder()
                    .username(user.getEmail())
                    .password(user.getPassword())
@@ -83,7 +68,7 @@ public class DatabaseUserDetailsManager implements UserDetailsManager {
      */
     @Override
     public void createUser(UserDetails user) {
-        throw new UnsupportedOperationException("Use register method with full data");
+        throw new UnsupportedOperationException(ExceptionMessages.USE_ACTUAL_REGISTER_METHOD);
     }
 
     /**
@@ -94,7 +79,7 @@ public class DatabaseUserDetailsManager implements UserDetailsManager {
      */
     @Override
     public void updateUser(UserDetails user) {
-        throw new UnsupportedOperationException("Update user not supported via UserDetailsManager");
+        throw new UnsupportedOperationException(ExceptionMessages.USE_ACTUAL_UPDATE_METHOD);
     }
 
     /**
@@ -106,7 +91,7 @@ public class DatabaseUserDetailsManager implements UserDetailsManager {
     @Override
     public void deleteUser(String username) {
         UsersDao user = userRepository.findByEmail(username)
-                                      .orElseThrow(() -> new UserNotFoundException("User not found: " + username));
+                                      .orElseThrow(() -> new UserNotFoundException(String.format(ExceptionMessages.USER_NOT_FOUND, username)));
         userRepository.delete(user);
     }
 
@@ -126,12 +111,13 @@ public class DatabaseUserDetailsManager implements UserDetailsManager {
     public void changePassword(String oldPassword, String newPassword) {
         String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
         UsersDao user = userRepository.findByEmail(currentUsername)
-                                      .orElseThrow(() -> new UserNotFoundException("User not found: " + currentUsername));
+                                      .orElseThrow(() -> new UserNotFoundException(String.format(ExceptionMessages.USER_NOT_FOUND, currentUsername)));
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
-            throw new InvalidCurrentPasswordException("Current password is incorrect");
+            throw new InvalidCurrentPasswordException(ExceptionMessages.INVALID_CURRENT_PASSWORD);
         }
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
+        log.info("Password changed for user: {}", currentUsername);
     }
 
     /**

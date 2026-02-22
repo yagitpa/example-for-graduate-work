@@ -5,6 +5,11 @@ import ru.skypro.homework.dto.user.NewPasswordDto;
 import ru.skypro.homework.dto.user.UpdateUserDto;
 import ru.skypro.homework.dto.user.UserDto;
 
+/**
+ * Сервис для управления пользователями.
+ * Предоставляет методы для получения информации о текущем пользователе,
+ * обновления данных, смены пароля и загрузки аватара.
+ */
 public interface UserService {
 
     /**

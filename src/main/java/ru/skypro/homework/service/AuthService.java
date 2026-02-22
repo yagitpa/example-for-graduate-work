@@ -2,6 +2,10 @@ package ru.skypro.homework.service;
 
 import ru.skypro.homework.dto.auth.RegisterDto;
 
+/**
+ * Сервис аутентификации и регистрации пользователей.
+ * Предоставляет методы для входа в систему и регистрации новых пользователей.
+ */
 public interface AuthService {
 
     /**

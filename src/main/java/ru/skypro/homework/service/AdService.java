@@ -6,6 +6,11 @@ import ru.skypro.homework.dto.ad.AdsDto;
 import ru.skypro.homework.dto.ad.CreateOrUpdateAdDto;
 import ru.skypro.homework.dto.ad.ExtendedAdDto;
 
+/**
+ * Сервис для работы с объявлениями.
+ * Предоставляет методы для получения, создания, обновления, удаления объявлений,
+ * а также для управления изображениями объявлений.
+ */
 public interface AdService {
 
     /**
