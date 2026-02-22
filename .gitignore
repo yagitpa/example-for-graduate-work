@@ -62,4 +62,4 @@ application.yml
 # Application specific
 uploads/
 tmp/
-/htmlReport/
+

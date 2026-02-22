@@ -1,0 +1,223 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > RegisterDto</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">ru.skypro.homework.dto.auth</a>
+</div>
+
+<h1>Coverage Summary for Class: RegisterDto (ru.skypro.homework.dto.auth)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">RegisterDto</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (7/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/54)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (8/8)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package ru.skypro.homework.dto.auth;
+&nbsp;
+&nbsp;import static ru.skypro.homework.constants.ValidationConstants.FIRST_NAME_MAX_SIZE;
+&nbsp;import static ru.skypro.homework.constants.ValidationConstants.FIRST_NAME_MIN_SIZE;
+&nbsp;import static ru.skypro.homework.constants.ValidationConstants.LAST_NAME_MAX_SIZE;
+&nbsp;import static ru.skypro.homework.constants.ValidationConstants.LAST_NAME_MIN_SIZE;
+&nbsp;import static ru.skypro.homework.constants.ValidationConstants.PASSWORD_MAX_SIZE;
+&nbsp;import static ru.skypro.homework.constants.ValidationConstants.PASSWORD_MIN_SIZE;
+&nbsp;import static ru.skypro.homework.constants.ValidationConstants.PHONE_EXAMPLE;
+&nbsp;import static ru.skypro.homework.constants.ValidationConstants.PHONE_PATTERN;
+&nbsp;import static ru.skypro.homework.constants.ValidationConstants.USERNAME_MAX_SIZE;
+&nbsp;import static ru.skypro.homework.constants.ValidationConstants.USERNAME_MIN_SIZE;
+&nbsp;
+&nbsp;import io.swagger.v3.oas.annotations.media.Schema;
+&nbsp;
+&nbsp;import lombok.Data;
+&nbsp;
+&nbsp;import javax.validation.constraints.NotBlank;
+&nbsp;import javax.validation.constraints.Pattern;
+&nbsp;import javax.validation.constraints.Size;
+&nbsp;
+<b class="pc">&nbsp;@Data</b>
+&nbsp;@Schema(description = &quot;DTO для регистрации пользователя&quot;)
+&nbsp;public class RegisterDto {
+&nbsp;
+&nbsp;    @Schema(
+&nbsp;            description = &quot;Логин пользователя&quot;,
+&nbsp;            minLength = USERNAME_MIN_SIZE,
+&nbsp;            maxLength = USERNAME_MAX_SIZE,
+&nbsp;            example = &quot;user123&quot;)
+&nbsp;    @NotBlank(message = &quot;Логин не может быть пустым&quot;)
+&nbsp;    @Size(
+&nbsp;            min = USERNAME_MIN_SIZE,
+&nbsp;            max = USERNAME_MAX_SIZE,
+&nbsp;            message =
+&nbsp;                    &quot;Логин должен быть от &quot;
+&nbsp;                            + USERNAME_MIN_SIZE
+&nbsp;                            + &quot; до &quot;
+&nbsp;                            + USERNAME_MAX_SIZE
+&nbsp;                            + &quot; символов&quot;)
+<b class="fc">&nbsp;    private String username;</b>
+&nbsp;
+&nbsp;    @Schema(
+&nbsp;            description = &quot;Пароль пользователя&quot;,
+&nbsp;            minLength = PASSWORD_MIN_SIZE,
+&nbsp;            maxLength = PASSWORD_MAX_SIZE,
+&nbsp;            example = &quot;password123&quot;)
+&nbsp;    @NotBlank(message = &quot;Пароль не может быть пустым&quot;)
+&nbsp;    @Size(
+&nbsp;            min = PASSWORD_MIN_SIZE,
+&nbsp;            max = PASSWORD_MAX_SIZE,
+&nbsp;            message =
+&nbsp;                    &quot;Пароль должен быть от &quot;
+&nbsp;                            + PASSWORD_MIN_SIZE
+&nbsp;                            + &quot; до &quot;
+&nbsp;                            + PASSWORD_MAX_SIZE
+&nbsp;                            + &quot; символов&quot;)
+<b class="fc">&nbsp;    private String password;</b>
+&nbsp;
+&nbsp;    @Schema(
+&nbsp;            description = &quot;Имя пользователя&quot;,
+&nbsp;            minLength = FIRST_NAME_MIN_SIZE,
+&nbsp;            maxLength = FIRST_NAME_MAX_SIZE,
+&nbsp;            example = &quot;Иван&quot;)
+&nbsp;    @NotBlank(message = &quot;Имя не может быть пустым&quot;)
+&nbsp;    @Size(
+&nbsp;            min = FIRST_NAME_MIN_SIZE,
+&nbsp;            max = FIRST_NAME_MAX_SIZE,
+&nbsp;            message =
+&nbsp;                    &quot;Имя должно быть от &quot;
+&nbsp;                            + FIRST_NAME_MIN_SIZE
+&nbsp;                            + &quot; до &quot;
+&nbsp;                            + FIRST_NAME_MAX_SIZE
+&nbsp;                            + &quot; символов&quot;)
+<b class="fc">&nbsp;    private String firstName;</b>
+&nbsp;
+&nbsp;    @Schema(
+&nbsp;            description = &quot;Фамилия пользователя&quot;,
+&nbsp;            minLength = LAST_NAME_MIN_SIZE,
+&nbsp;            maxLength = LAST_NAME_MAX_SIZE,
+&nbsp;            example = &quot;Иванов&quot;)
+&nbsp;    @NotBlank(message = &quot;Фамилия не может быть пустой&quot;)
+&nbsp;    @Size(
+&nbsp;            min = LAST_NAME_MIN_SIZE,
+&nbsp;            max = LAST_NAME_MAX_SIZE,
+&nbsp;            message =
+&nbsp;                    &quot;Фамилия должна быть от &quot;
+&nbsp;                            + LAST_NAME_MIN_SIZE
+&nbsp;                            + &quot; до &quot;
+&nbsp;                            + LAST_NAME_MAX_SIZE
+&nbsp;                            + &quot; символов&quot;)
+<b class="fc">&nbsp;    private String lastName;</b>
+&nbsp;
+&nbsp;    @Schema(description = &quot;Телефон пользователя&quot;, pattern = PHONE_PATTERN, example = PHONE_EXAMPLE)
+&nbsp;    @NotBlank(message = &quot;Телефон не может быть пустым&quot;)
+&nbsp;    @Pattern(
+&nbsp;            regexp = PHONE_PATTERN,
+&nbsp;            message = &quot;Телефон должен соответствовать формату, например &quot; + PHONE_EXAMPLE)
+<b class="fc">&nbsp;    private String phone;</b>
+&nbsp;
+<b class="fc">&nbsp;    @Schema(</b>
+&nbsp;            description = &quot;Роль пользователя&quot;,
+&nbsp;            allowableValues = {&quot;USER&quot;, &quot;ADMIN&quot;},
+&nbsp;            example = &quot;USER&quot;,
+&nbsp;            defaultValue = &quot;USER&quot;)
+<b class="fc">&nbsp;    private Role role = Role.USER;</b>
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-02-22 23:22</div>
+</div>
+</body>
+</html>

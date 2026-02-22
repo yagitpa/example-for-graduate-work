@@ -1,0 +1,361 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > ImageService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">ru.skypro.homework.service</a>
+</div>
+
+<h1>Coverage Summary for Class: ImageService (ru.skypro.homework.service)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ImageService</td>
+<td class="coverageStat">
+  <span class="percent">
+    53,8%
+  </span>
+  <span class="absValue">
+    (7/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    28,6%
+  </span>
+  <span class="absValue">
+    (4/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    39,1%
+  </span>
+  <span class="absValue">
+    (18/46)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">ImageService$ImageData</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/16)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">ImageService$MockitoMock$ITrt0wMh</td>
+  </tr>
+  <tr>
+    <td class="name">ImageService$MockitoMock$ITrt0wMh$auxiliary$69Z3az2O</td>
+  </tr>
+  <tr>
+    <td class="name">ImageService$MockitoMock$ITrt0wMh$auxiliary$i9bh2iH8</td>
+  </tr>
+  <tr>
+    <td class="name">ImageService$MockitoMock$ITrt0wMh$auxiliary$iQklf9o0</td>
+  </tr>
+  <tr>
+    <td class="name">ImageService$MockitoMock$ITrt0wMh$auxiliary$J6eaY500</td>
+  </tr>
+  <tr>
+    <td class="name">ImageService$MockitoMock$ITrt0wMh$auxiliary$kAbgA2ZD</td>
+  </tr>
+  <tr>
+    <td class="name">ImageService$MockitoMock$ITrt0wMh$auxiliary$MsSHao9l</td>
+  </tr>
+  <tr>
+    <td class="name">ImageService$MockitoMock$ITrt0wMh$auxiliary$N1WiW4n6</td>
+  </tr>
+  <tr>
+    <td class="name">ImageService$MockitoMock$ITrt0wMh$auxiliary$w0MEUx5n</td>
+  </tr>
+  <tr>
+    <td class="name">ImageService$MockitoMock$ITrt0wMh$auxiliary$wWzbkIdh</td>
+  </tr>
+  <tr>
+    <td class="name">ImageService$MockitoMock$ITrt0wMh$auxiliary$z9e3YjrR</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    62,5%
+  </span>
+  <span class="absValue">
+    (10/16)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    13,3%
+  </span>
+  <span class="absValue">
+    (4/30)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    42,9%
+  </span>
+  <span class="absValue">
+    (21/49)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package ru.skypro.homework.service;
+&nbsp;
+&nbsp;import lombok.Data;
+&nbsp;import lombok.Getter;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;
+&nbsp;import org.springframework.beans.factory.annotation.Value;
+&nbsp;import org.springframework.http.MediaType;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;import org.springframework.web.multipart.MultipartFile;
+&nbsp;
+&nbsp;import ru.skypro.homework.constants.ExceptionMessages;
+&nbsp;import ru.skypro.homework.exception.ImageNotFoundException;
+&nbsp;import ru.skypro.homework.exception.ImageReadException;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.nio.file.Files;
+&nbsp;import java.nio.file.Path;
+&nbsp;import java.nio.file.Paths;
+&nbsp;import java.util.UUID;
+&nbsp;
+&nbsp;import javax.annotation.PostConstruct;
+&nbsp;
+&nbsp;/**
+&nbsp; * Сервис для работы с изображениями. Обеспечивает сохранение, удаление, чтение файлов изображений,
+&nbsp; * а также загрузку их с определением MIME-типа.
+&nbsp; *
+&nbsp; * &lt;p&gt;При ошибках ввода-вывода выбрасывает {@link ImageReadException}, при отсутствии файла – {@link
+&nbsp; * ImageNotFoundException}.
+&nbsp; */
+&nbsp;@Getter
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;@Service
+<b class="fc">&nbsp;@RequiredArgsConstructor</b>
+&nbsp;public class ImageService {
+&nbsp;
+&nbsp;    @Value(&quot;${app.image.avatar-dir}&quot;)
+<b class="nc">&nbsp;    private String avatarDir;</b>
+&nbsp;
+&nbsp;    @Value(&quot;${app.image.ad-dir}&quot;)
+<b class="nc">&nbsp;    private String adImageDir;</b>
+&nbsp;
+&nbsp;    public ImageData loadAdImage(String filename) {
+<b class="fc">&nbsp;        return loadImage(filename, adImageDir);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public ImageData loadAvatar(String filename) {
+<b class="fc">&nbsp;        return loadImage(filename, avatarDir);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PostConstruct
+&nbsp;    public void init() {
+<b class="fc">&nbsp;        createDirectoryIfNotExists(avatarDir);</b>
+<b class="fc">&nbsp;        createDirectoryIfNotExists(adImageDir);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Сохраняет файл в указанную директорию.
+&nbsp;     *
+&nbsp;     * @param image загружаемый файл
+&nbsp;     * @param directory корневая директория для сохранения (например, &quot;./avatars&quot;)
+&nbsp;     * @param urlPrefix префикс URL для доступа (например, &quot;/avatars/&quot;)
+&nbsp;     * @return относительный путь к файлу (например, &quot;/avatars/file.jpg&quot;)
+&nbsp;     */
+&nbsp;    public String saveImage(MultipartFile image, String directory, String urlPrefix) {
+&nbsp;        try {
+<b class="nc">&nbsp;            String extension = getExtension(image.getOriginalFilename());</b>
+<b class="nc">&nbsp;            String filename = UUID.randomUUID() + extension;</b>
+<b class="nc">&nbsp;            Path uploadPath = Paths.get(directory);</b>
+<b class="nc">&nbsp;            if (!Files.exists(uploadPath)) {</b>
+<b class="nc">&nbsp;                Files.createDirectories(uploadPath);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            Path filePath = uploadPath.resolve(filename);</b>
+<b class="nc">&nbsp;            image.transferTo(filePath.toFile());</b>
+<b class="nc">&nbsp;            return urlPrefix + filename;</b>
+&nbsp;        } catch (IOException e) {
+<b class="nc">&nbsp;            log.error(&quot;Failed to save image to {}&quot;, directory, e);</b>
+<b class="nc">&nbsp;            throw new RuntimeException(ExceptionMessages.IMAGE_FAILED_TO_SAVE, e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Удаляет файл по его относительному пути.
+&nbsp;     *
+&nbsp;     * @param imagePath относительный путь (например, &quot;/avatars/file.jpg&quot;)
+&nbsp;     * @param directory корневая директория (например, &quot;./avatars&quot;)
+&nbsp;     */
+&nbsp;    public void deleteImage(String imagePath, String directory) {
+<b class="nc">&nbsp;        if (imagePath == null) return;</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            Path fullPath = Paths.get(directory, Paths.get(imagePath).getFileName().toString());</b>
+<b class="nc">&nbsp;            Files.deleteIfExists(fullPath);</b>
+&nbsp;        } catch (IOException e) {
+<b class="nc">&nbsp;            log.warn(&quot;Failed to delete image file: {}&quot;, imagePath, e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Читает файл в массив байт.
+&nbsp;     *
+&nbsp;     * @param imagePath относительный путь к файлу
+&nbsp;     * @param directory корневая директория
+&nbsp;     * @return массив байт файла
+&nbsp;     */
+&nbsp;    public byte[] readImageAsBytes(String imagePath, String directory) {
+&nbsp;        try {
+<b class="nc">&nbsp;            Path fullPath = Paths.get(directory, Paths.get(imagePath).getFileName().toString());</b>
+<b class="nc">&nbsp;            return Files.readAllBytes(fullPath);</b>
+&nbsp;        } catch (IOException e) {
+<b class="nc">&nbsp;            log.error(&quot;Failed to read image file: {}&quot;, imagePath, e);</b>
+<b class="nc">&nbsp;            throw new RuntimeException(</b>
+<b class="nc">&nbsp;                    String.format(ExceptionMessages.IMAGE_FAILED_TO_READ, imagePath), e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Загружает изображение из указанной директории.
+&nbsp;     *
+&nbsp;     * @param filename имя файла
+&nbsp;     * @param directory директория (avatarDir или adImageDir)
+&nbsp;     * @return объект {@link ImageData} с содержимым и MIME-типом, или null если файл не найден
+&nbsp;     * @throws ImageNotFoundException исключение при ошибке &quot;изображение не найдено&quot;
+&nbsp;     * @throws ImageReadException исключение при ошибке чтения изображения
+&nbsp;     */
+&nbsp;    private ImageData loadImage(String filename, String directory) {
+&nbsp;        try {
+<b class="fc">&nbsp;            Path path = Paths.get(directory, filename);</b>
+<b class="fc">&nbsp;            if (!Files.exists(path)) {</b>
+<b class="fc">&nbsp;                throw new ImageNotFoundException(</b>
+<b class="fc">&nbsp;                        String.format(ExceptionMessages.IMAGE_NOT_FOUND, filename));</b>
+&nbsp;            }
+<b class="fc">&nbsp;            byte[] content = Files.readAllBytes(path);</b>
+<b class="fc">&nbsp;            String contentType = Files.probeContentType(path);</b>
+<b class="pc">&nbsp;            if (contentType == null) {</b>
+<b class="nc">&nbsp;                contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;</b>
+&nbsp;            }
+<b class="fc">&nbsp;            return new ImageData(content, contentType);</b>
+&nbsp;        } catch (IOException e) {
+<b class="nc">&nbsp;            throw new ImageReadException(</b>
+<b class="nc">&nbsp;                    String.format(ExceptionMessages.IMAGE_FAILED_TO_READ, filename), e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private String getExtension(String filename) {
+<b class="nc">&nbsp;        if (filename == null || !filename.contains(&quot;.&quot;)) {</b>
+<b class="nc">&nbsp;            return &quot;&quot;;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return filename.substring(filename.lastIndexOf(&quot;.&quot;));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void createDirectoryIfNotExists(String dir) {
+<b class="fc">&nbsp;        Path path = Paths.get(dir);</b>
+<b class="pc">&nbsp;        if (!Files.exists(path)) {</b>
+&nbsp;            try {
+<b class="fc">&nbsp;                Files.createDirectories(path);</b>
+<b class="fc">&nbsp;                log.info(&quot;Created directory: {}&quot;, path.toAbsolutePath());</b>
+&nbsp;            } catch (IOException e) {
+<b class="nc">&nbsp;                log.error(&quot;Failed to create directory: {}&quot;, path.toAbsolutePath(), e);</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /** Вспомогательный класс для передачи данных изображения. */
+<b class="pc">&nbsp;    @Data</b>
+&nbsp;    public static class ImageData {
+<b class="fc">&nbsp;        private final byte[] content;</b>
+<b class="fc">&nbsp;        private final String contentType;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-02-22 23:22</div>
+</div>
+</body>
+</html>

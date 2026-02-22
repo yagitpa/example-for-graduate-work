@@ -1,0 +1,188 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > UsersDao</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">ru.skypro.homework.model</a>
+</div>
+
+<h1>Coverage Summary for Class: UsersDao (ru.skypro.homework.model)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">UsersDao</td>
+<td class="coverageStat">
+  <span class="percent">
+    76,9%
+  </span>
+  <span class="absValue">
+    (10/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    80%
+  </span>
+  <span class="absValue">
+    (12/15)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">UsersDao$HibernateProxy$MD710YTO</td>
+  </tr>
+  <tr>
+    <td class="name">UsersDao$HibernateProxy$mGR6X0Nt</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    76,9%
+  </span>
+  <span class="absValue">
+    (10/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    80%
+  </span>
+  <span class="absValue">
+    (12/15)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package ru.skypro.homework.model;
+&nbsp;
+&nbsp;import lombok.AllArgsConstructor;
+&nbsp;import lombok.Getter;
+&nbsp;import lombok.NoArgsConstructor;
+&nbsp;import lombok.Setter;
+&nbsp;
+&nbsp;import ru.skypro.homework.dto.auth.Role;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import javax.persistence.CascadeType;
+&nbsp;import javax.persistence.Column;
+&nbsp;import javax.persistence.Entity;
+&nbsp;import javax.persistence.EnumType;
+&nbsp;import javax.persistence.Enumerated;
+&nbsp;import javax.persistence.FetchType;
+&nbsp;import javax.persistence.GeneratedValue;
+&nbsp;import javax.persistence.GenerationType;
+&nbsp;import javax.persistence.Id;
+&nbsp;import javax.persistence.OneToMany;
+&nbsp;import javax.persistence.Table;
+&nbsp;
+&nbsp;@Entity
+&nbsp;@Table(name = &quot;users&quot;)
+&nbsp;@Getter
+<b class="fc">&nbsp;@Setter</b>
+<b class="fc">&nbsp;@NoArgsConstructor</b>
+<b class="nc">&nbsp;@AllArgsConstructor</b>
+&nbsp;public class UsersDao {
+&nbsp;
+&nbsp;    public static final int MAX_EMAIL_LENGTH = 254;
+&nbsp;    public static final int MAX_FIRSTNAME_LENGTH = 50;
+&nbsp;    public static final int MAX_LASTNAME_LENGTH = 50;
+&nbsp;    public static final int MAX_PHONE_LENGTH = 20;
+&nbsp;    public static final int MAX_PASSWORD_LENGTH = 100;
+&nbsp;    public static final int MAX_IMAGE_LENGTH = 512;
+&nbsp;
+&nbsp;    @Id
+&nbsp;    @GeneratedValue(strategy = GenerationType.IDENTITY)
+<b class="fc">&nbsp;    private Integer id;</b>
+&nbsp;
+&nbsp;    @Column(name = &quot;email&quot;, nullable = false, unique = true, length = MAX_EMAIL_LENGTH)
+<b class="fc">&nbsp;    private String email;</b>
+&nbsp;
+&nbsp;    @Column(name = &quot;password&quot;, nullable = false, length = MAX_PASSWORD_LENGTH)
+<b class="fc">&nbsp;    private String password;</b>
+&nbsp;
+&nbsp;    @Column(name = &quot;first_name&quot;, nullable = false, length = MAX_FIRSTNAME_LENGTH)
+<b class="fc">&nbsp;    private String firstName;</b>
+&nbsp;
+&nbsp;    @Column(name = &quot;last_name&quot;, nullable = false, length = MAX_LASTNAME_LENGTH)
+<b class="fc">&nbsp;    private String lastName;</b>
+&nbsp;
+&nbsp;    @Column(name = &quot;phone&quot;, nullable = false, length = MAX_PHONE_LENGTH)
+<b class="fc">&nbsp;    private String phone;</b>
+&nbsp;
+&nbsp;    @Enumerated(EnumType.STRING)
+&nbsp;    @Column(name = &quot;role&quot;, nullable = false, length = 10)
+<b class="fc">&nbsp;    private Role role;</b>
+&nbsp;
+&nbsp;    @Column(name = &quot;image&quot;, length = MAX_IMAGE_LENGTH)
+<b class="fc">&nbsp;    private String image;</b>
+&nbsp;
+<b class="fc">&nbsp;    @OneToMany(mappedBy = &quot;author&quot;, cascade = CascadeType.ALL, fetch = FetchType.LAZY)</b>
+<b class="nc">&nbsp;    private List&lt;AdsDao&gt; adsDaos = new ArrayList&lt;&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;    @OneToMany(mappedBy = &quot;author&quot;, cascade = CascadeType.ALL, fetch = FetchType.LAZY)</b>
+<b class="nc">&nbsp;    private List&lt;CommentsDao&gt; commentsDaos = new ArrayList&lt;&gt;();</b>
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-02-22 23:22</div>
+</div>
+</body>
+</html>

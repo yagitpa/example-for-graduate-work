@@ -1,0 +1,229 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > UserServiceImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">ru.skypro.homework.service.impl</a>
+</div>
+
+<h1>Coverage Summary for Class: UserServiceImpl (ru.skypro.homework.service.impl)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">UserServiceImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (3/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (21/21)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">UserServiceImpl$$EnhancerBySpringCGLIB$$5017a5c2</td>
+  </tr>
+  <tr>
+    <td class="name">UserServiceImpl$$EnhancerBySpringCGLIB$$5017a5c2$$FastClassBySpringCGLIB$$efe0f501</td>
+  </tr>
+  <tr>
+    <td class="name">UserServiceImpl$$FastClassBySpringCGLIB$$66204b5c</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (3/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (21/21)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package ru.skypro.homework.service.impl;
+&nbsp;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;
+&nbsp;import org.springframework.beans.factory.annotation.Value;
+&nbsp;import org.springframework.security.crypto.password.PasswordEncoder;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;import org.springframework.web.multipart.MultipartFile;
+&nbsp;
+&nbsp;import ru.skypro.homework.constants.ExceptionMessages;
+&nbsp;import ru.skypro.homework.constants.UrlPrefixConstants;
+&nbsp;import ru.skypro.homework.dto.user.NewPasswordDto;
+&nbsp;import ru.skypro.homework.dto.user.UpdateUserDto;
+&nbsp;import ru.skypro.homework.dto.user.UserDto;
+&nbsp;import ru.skypro.homework.exception.InvalidCurrentPasswordException;
+&nbsp;import ru.skypro.homework.mapper.UserMapper;
+&nbsp;import ru.skypro.homework.model.UsersDao;
+&nbsp;import ru.skypro.homework.repository.UserRepository;
+&nbsp;import ru.skypro.homework.service.CurrentUserService;
+&nbsp;import ru.skypro.homework.service.ImageService;
+&nbsp;import ru.skypro.homework.service.UserService;
+&nbsp;
+&nbsp;/**
+&nbsp; * Реализация сервиса {@link UserService}. Использует {@link UserRepository} для доступа к данным
+&nbsp; * пользователей, {@link PasswordEncoder} для шифрования паролей, {@link CurrentUserService} для
+&nbsp; * получения текущего аутентифицированного пользователя, {@link ImageService} для сохранения и
+&nbsp; * удаления аватаров.
+&nbsp; *
+&nbsp; * @see UserService
+&nbsp; * @see UserRepository
+&nbsp; * @see UserMapper
+&nbsp; * @see CurrentUserService
+&nbsp; * @see ImageService
+&nbsp; */
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;@Service
+<b class="fc">&nbsp;@RequiredArgsConstructor</b>
+&nbsp;@Transactional
+&nbsp;public class UserServiceImpl implements UserService {
+&nbsp;
+&nbsp;    private final UserRepository userRepository;
+&nbsp;    private final UserMapper userMapper;
+&nbsp;    private final PasswordEncoder passwordEncoder;
+&nbsp;    private final CurrentUserService currentUserService;
+&nbsp;    private final ImageService imageService;
+&nbsp;
+&nbsp;    @Value(&quot;${app.image.avatar-dir}&quot;)
+&nbsp;    private String avatarDir;
+&nbsp;
+&nbsp;    @Override
+&nbsp;    @Transactional(readOnly = true)
+&nbsp;    public UserDto getUser() {
+<b class="fc">&nbsp;        UsersDao user = currentUserService.getCurrentUser();</b>
+<b class="fc">&nbsp;        return userMapper.toUserDto(user);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public UpdateUserDto updateUser(UpdateUserDto updateUserDto) {
+<b class="fc">&nbsp;        UsersDao user = currentUserService.getCurrentUser();</b>
+<b class="fc">&nbsp;        userMapper.updateUserFromDto(updateUserDto, user);</b>
+<b class="fc">&nbsp;        userRepository.save(user);</b>
+<b class="fc">&nbsp;        return updateUserDto;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void setPassword(NewPasswordDto newPasswordDto) {
+<b class="fc">&nbsp;        UsersDao user = currentUserService.getCurrentUser();</b>
+<b class="fc">&nbsp;        if (!passwordEncoder.matches(newPasswordDto.getCurrentPassword(), user.getPassword())) {</b>
+<b class="fc">&nbsp;            throw new InvalidCurrentPasswordException(ExceptionMessages.INVALID_CURRENT_PASSWORD);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        user.setPassword(passwordEncoder.encode(newPasswordDto.getNewPassword()));</b>
+<b class="fc">&nbsp;        userRepository.save(user);</b>
+<b class="fc">&nbsp;        log.info(&quot;Password changed for user: {}&quot;, user.getEmail());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void updateUserImage(MultipartFile image) {
+<b class="fc">&nbsp;        UsersDao user = currentUserService.getCurrentUser();</b>
+<b class="fc">&nbsp;        String newImagePath =</b>
+<b class="fc">&nbsp;                imageService.saveImage(image, avatarDir, UrlPrefixConstants.URL_PREFIX_AVATARS);</b>
+<b class="pc">&nbsp;        if (user.getImage() != null) {</b>
+<b class="fc">&nbsp;            imageService.deleteImage(user.getImage(), avatarDir);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        user.setImage(newImagePath);</b>
+<b class="fc">&nbsp;        userRepository.save(user);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-02-22 23:22</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,132 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > CommentRepository</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">ru.skypro.homework.repository</a>
+</div>
+
+<h1>Coverage Summary for Class: CommentRepository (ru.skypro.homework.repository)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">CommentRepository</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package ru.skypro.homework.repository;
+&nbsp;
+&nbsp;import org.springframework.data.domain.Page;
+&nbsp;import org.springframework.data.domain.Pageable;
+&nbsp;import org.springframework.data.jpa.repository.JpaRepository;
+&nbsp;import org.springframework.stereotype.Repository;
+&nbsp;
+&nbsp;import ru.skypro.homework.model.CommentsDao;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;@Repository
+&nbsp;public interface CommentRepository extends JpaRepository&lt;CommentsDao, Integer&gt; {
+&nbsp;
+&nbsp;    // ---------- Методы без пагинации ----------
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Получение всех комментариев к объявлению, отсортированных по дате создания (сначала новые).
+&nbsp;     * Без пагинации – возвращает полный список, например, для экспорта.
+&nbsp;     *
+&nbsp;     * @param adPk идентификатор объявления (ad.pk)
+&nbsp;     * @return список комментариев
+&nbsp;     */
+&nbsp;    List&lt;CommentsDao&gt; findByAdPkOrderByCreatedAtDesc(Integer adPk);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Поиск комментария по его идентификатору и идентификатору объявления.
+&nbsp;     *
+&nbsp;     * @param pk идентификатор комментария (comment.pk)
+&nbsp;     * @param adPk идентификатор объявления (ad.pk)
+&nbsp;     * @return Optional с комментарием или пустой Optional
+&nbsp;     */
+&nbsp;    Optional&lt;CommentsDao&gt; findByPkAndAdPk(Integer pk, Integer adPk);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Поиск комментария по его идентификатору и идентификатору автора.
+&nbsp;     *
+&nbsp;     * @param pk идентификатор комментария (comment.pk)
+&nbsp;     * @param authorId идентификатор автора (author.id)
+&nbsp;     * @return Optional с комментарием или пустой Optional
+&nbsp;     */
+&nbsp;    Optional&lt;CommentsDao&gt; findByPkAndAuthorId(Integer pk, Integer authorId);
+&nbsp;
+&nbsp;    // ---------- Методы с пагинацией ----------
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Получение комментариев к объявлению с пагинацией и сортировкой по дате создания (новые
+&nbsp;     * первыми).
+&nbsp;     *
+&nbsp;     * @param adPk идентификатор объявления (ad.pk)
+&nbsp;     * @param pageable параметры пагинации и сортировки
+&nbsp;     * @return страница комментариев
+&nbsp;     */
+&nbsp;    Page&lt;CommentsDao&gt; findByAdPk(Integer adPk, Pageable pageable);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Подсчёт количества комментариев у объявления.
+&nbsp;     *
+&nbsp;     * @param adPk идентификатор объявления
+&nbsp;     * @return количество комментариев
+&nbsp;     */
+&nbsp;    long countByAdPk(Integer adPk);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-02-22 23:22</div>
+</div>
+</body>
+</html>

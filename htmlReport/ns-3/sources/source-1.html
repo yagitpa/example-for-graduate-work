@@ -1,0 +1,284 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > AdController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">ru.skypro.homework.controller.ad</a>
+</div>
+
+<h1>Coverage Summary for Class: AdController (ru.skypro.homework.controller.ad)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AdController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (9/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (16/16)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">AdController$$EnhancerBySpringCGLIB$$c131dba5</td>
+  </tr>
+  <tr>
+    <td class="name">AdController$$EnhancerBySpringCGLIB$$c131dba5$$FastClassBySpringCGLIB$$403c1a78</td>
+  </tr>
+  <tr>
+    <td class="name">AdController$$EnhancerBySpringCGLIB$$c131dba5_2</td>
+  </tr>
+  <tr>
+    <td class="name">AdController$$FastClassBySpringCGLIB$$b6bd6f9f</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (9/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (16/16)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package ru.skypro.homework.controller.ad;
+&nbsp;
+&nbsp;import io.swagger.v3.oas.annotations.Operation;
+&nbsp;import io.swagger.v3.oas.annotations.media.Content;
+&nbsp;import io.swagger.v3.oas.annotations.media.Schema;
+&nbsp;import io.swagger.v3.oas.annotations.responses.ApiResponse;
+&nbsp;import io.swagger.v3.oas.annotations.responses.ApiResponses;
+&nbsp;import io.swagger.v3.oas.annotations.tags.Tag;
+&nbsp;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;
+&nbsp;import org.springframework.http.HttpStatus;
+&nbsp;import org.springframework.http.MediaType;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.security.core.Authentication;
+&nbsp;import org.springframework.validation.annotation.Validated;
+&nbsp;import org.springframework.web.bind.annotation.DeleteMapping;
+&nbsp;import org.springframework.web.bind.annotation.GetMapping;
+&nbsp;import org.springframework.web.bind.annotation.PatchMapping;
+&nbsp;import org.springframework.web.bind.annotation.PathVariable;
+&nbsp;import org.springframework.web.bind.annotation.PostMapping;
+&nbsp;import org.springframework.web.bind.annotation.RequestBody;
+&nbsp;import org.springframework.web.bind.annotation.RequestMapping;
+&nbsp;import org.springframework.web.bind.annotation.RequestParam;
+&nbsp;import org.springframework.web.bind.annotation.RequestPart;
+&nbsp;import org.springframework.web.bind.annotation.RestController;
+&nbsp;import org.springframework.web.multipart.MultipartFile;
+&nbsp;
+&nbsp;import ru.skypro.homework.dto.ad.AdDto;
+&nbsp;import ru.skypro.homework.dto.ad.AdsDto;
+&nbsp;import ru.skypro.homework.dto.ad.CreateOrUpdateAdDto;
+&nbsp;import ru.skypro.homework.dto.ad.ExtendedAdDto;
+&nbsp;import ru.skypro.homework.service.AdService;
+&nbsp;
+&nbsp;import javax.validation.Valid;
+&nbsp;
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;@Validated
+&nbsp;@RestController
+<b class="fc">&nbsp;@RequiredArgsConstructor</b>
+&nbsp;@RequestMapping(&quot;/ads&quot;)
+&nbsp;@Tag(name = &quot;Объявления&quot;, description = &quot;API для работы с объявлениями&quot;)
+&nbsp;public class AdController {
+&nbsp;
+&nbsp;    private final AdService adService;
+&nbsp;
+&nbsp;    @Operation(summary = &quot;Получение всех объявлений&quot;)
+&nbsp;    @ApiResponses(
+&nbsp;            value = {
+&nbsp;                @ApiResponse(
+&nbsp;                        responseCode = &quot;200&quot;,
+&nbsp;                        description = &quot;Список объявлений получен&quot;,
+&nbsp;                        content = @Content(schema = @Schema(implementation = AdsDto.class)))
+&nbsp;            })
+&nbsp;    @GetMapping
+&nbsp;    public ResponseEntity&lt;AdsDto&gt; getAllAds() {
+<b class="fc">&nbsp;        return ResponseEntity.ok(adService.getAllAds());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Operation(summary = &quot;Добавление объявления&quot;)
+&nbsp;    @ApiResponses(
+&nbsp;            value = {
+&nbsp;                @ApiResponse(
+&nbsp;                        responseCode = &quot;201&quot;,
+&nbsp;                        description = &quot;Объявление создано&quot;,
+&nbsp;                        content = @Content(schema = @Schema(implementation = AdDto.class))),
+&nbsp;                @ApiResponse(responseCode = &quot;401&quot;, description = &quot;Пользователь не авторизован&quot;)
+&nbsp;            })
+&nbsp;    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+&nbsp;    public ResponseEntity&lt;AdDto&gt; addAd(
+&nbsp;            @RequestPart(&quot;properties&quot;) @Valid CreateOrUpdateAdDto properties,
+&nbsp;            @RequestPart(&quot;image&quot;) MultipartFile image,
+&nbsp;            Authentication authentication) {
+<b class="fc">&nbsp;        String email = authentication.getName();</b>
+<b class="fc">&nbsp;        AdDto createdAd = adService.addAd(email, properties, image);</b>
+<b class="fc">&nbsp;        return ResponseEntity.status(HttpStatus.CREATED).body(createdAd);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Operation(summary = &quot;Получение информации об объявлении&quot;)
+&nbsp;    @ApiResponses(
+&nbsp;            value = {
+&nbsp;                @ApiResponse(
+&nbsp;                        responseCode = &quot;200&quot;,
+&nbsp;                        description = &quot;Информация получена&quot;,
+&nbsp;                        content = @Content(schema = @Schema(implementation = ExtendedAdDto.class))),
+&nbsp;                @ApiResponse(responseCode = &quot;401&quot;, description = &quot;Пользователь не авторизован&quot;),
+&nbsp;                @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Объявление не найдено&quot;)
+&nbsp;            })
+&nbsp;    @GetMapping(&quot;/{id}&quot;)
+&nbsp;    public ResponseEntity&lt;ExtendedAdDto&gt; getAd(@PathVariable Integer id) {
+<b class="fc">&nbsp;        return ResponseEntity.ok(adService.getAd(id));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Operation(summary = &quot;Удаление объявления&quot;)
+&nbsp;    @ApiResponses(
+&nbsp;            value = {
+&nbsp;                @ApiResponse(responseCode = &quot;204&quot;, description = &quot;Объявление удалено&quot;),
+&nbsp;                @ApiResponse(responseCode = &quot;401&quot;, description = &quot;Пользователь не авторизован&quot;),
+&nbsp;                @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Доступ запрещен&quot;),
+&nbsp;                @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Объявление не найдено&quot;)
+&nbsp;            })
+&nbsp;    @DeleteMapping(&quot;/{id}&quot;)
+&nbsp;    public ResponseEntity&lt;Void&gt; removeAd(@PathVariable Integer id, Authentication authentication) {
+<b class="fc">&nbsp;        String email = authentication.getName();</b>
+<b class="fc">&nbsp;        adService.removeAd(id, email);</b>
+<b class="fc">&nbsp;        return ResponseEntity.noContent().build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Operation(summary = &quot;Обновление информации об объявлении&quot;)
+&nbsp;    @ApiResponses(
+&nbsp;            value = {
+&nbsp;                @ApiResponse(
+&nbsp;                        responseCode = &quot;200&quot;,
+&nbsp;                        description = &quot;Объявление обновлено&quot;,
+&nbsp;                        content = @Content(schema = @Schema(implementation = AdDto.class))),
+&nbsp;                @ApiResponse(responseCode = &quot;401&quot;, description = &quot;Пользователь не авторизован&quot;),
+&nbsp;                @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Доступ запрещен&quot;),
+&nbsp;                @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Объявление не найдено&quot;)
+&nbsp;            })
+&nbsp;    @PatchMapping(&quot;/{id}&quot;)
+&nbsp;    public ResponseEntity&lt;AdDto&gt; updateAd(
+&nbsp;            @PathVariable Integer id,
+&nbsp;            @Valid @RequestBody CreateOrUpdateAdDto updateAd,
+&nbsp;            Authentication authentication) {
+<b class="fc">&nbsp;        String email = authentication.getName();</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok(adService.updateAd(id, email, updateAd));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Operation(summary = &quot;Получение объявлений авторизованного пользователя&quot;)
+&nbsp;    @ApiResponses(
+&nbsp;            value = {
+&nbsp;                @ApiResponse(
+&nbsp;                        responseCode = &quot;200&quot;,
+&nbsp;                        description = &quot;Список объявлений получен&quot;,
+&nbsp;                        content = @Content(schema = @Schema(implementation = AdsDto.class))),
+&nbsp;                @ApiResponse(responseCode = &quot;401&quot;, description = &quot;Пользователь не авторизован&quot;)
+&nbsp;            })
+&nbsp;    @GetMapping(&quot;/me&quot;)
+&nbsp;    public ResponseEntity&lt;AdsDto&gt; getAdsMe() {
+<b class="fc">&nbsp;        return ResponseEntity.ok(adService.getAdsMe());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Operation(summary = &quot;Обновление картинки объявления&quot;)
+&nbsp;    @ApiResponses(
+&nbsp;            value = {
+&nbsp;                @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Изображение обновлено&quot;),
+&nbsp;                @ApiResponse(responseCode = &quot;401&quot;, description = &quot;Пользователь не авторизован&quot;),
+&nbsp;                @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Доступ запрещен&quot;),
+&nbsp;                @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Объявление не найдено&quot;)
+&nbsp;            })
+&nbsp;    @PatchMapping(value = &quot;/{id}/image&quot;, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+&nbsp;    public ResponseEntity&lt;byte[]&gt; updateImage(
+&nbsp;            @PathVariable Integer id,
+&nbsp;            @RequestParam(&quot;image&quot;) MultipartFile image,
+&nbsp;            Authentication authentication) {
+<b class="fc">&nbsp;        String email = authentication.getName();</b>
+<b class="fc">&nbsp;        byte[] updatedImage = adService.updateImage(id, email, image);</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok(updatedImage);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-02-22 23:22</div>
+</div>
+</body>
+</html>
