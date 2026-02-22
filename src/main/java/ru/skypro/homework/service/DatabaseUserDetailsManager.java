@@ -2,6 +2,7 @@ package ru.skypro.homework.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import ru.skypro.homework.constants.ExceptionMessages;
 import ru.skypro.homework.exception.InvalidCurrentPasswordException;
 import ru.skypro.homework.exception.UserNotFoundException;
@@ -19,10 +21,10 @@ import ru.skypro.homework.repository.UserRepository;
 /**
  * Кастомная реализация {@link UserDetailsManager}, обеспечивающая хранение и управление
  * пользователями в базе данных через {@link UserRepository}.
- * <p>
- * Используется для аутентификации и авторизации на основе данных из БД.
- * Предоставляет полный набор операций управления пользователями:
- * загрузка, создание, обновление, удаление, смена пароля, проверка существования.
+ *
+ * <p>Используется для аутентификации и авторизации на основе данных из БД. Предоставляет полный
+ * набор операций управления пользователями: загрузка, создание, обновление, удаление, смена пароля,
+ * проверка существования.
  *
  * @see UserDetailsManager
  * @see UserRepository
@@ -46,22 +48,29 @@ public class DatabaseUserDetailsManager implements UserDetailsManager {
      */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UsersDao user = userRepository.findByEmail(username)
-                                      .orElseThrow(() -> new UsernameNotFoundException(String.format(ExceptionMessages.USER_NOT_FOUND, username)));
+        UsersDao user =
+                userRepository
+                        .findByEmail(username)
+                        .orElseThrow(
+                                () ->
+                                        new UsernameNotFoundException(
+                                                String.format(
+                                                        ExceptionMessages.USER_NOT_FOUND,
+                                                        username)));
         return User.builder()
-                   .username(user.getEmail())
-                   .password(user.getPassword())
-                   .roles(user.getRole().name())
-                   .build();
+                .username(user.getEmail())
+                .password(user.getPassword())
+                .roles(user.getRole().name())
+                .build();
     }
 
     /**
      * Создаёт нового пользователя в БД.
-     * <p>
-     * <b>Примечание:</b> Этот метод не используется при регистрации, так как
-     * стандартный {@link UserDetails} не содержит полей firstName, lastName, phone.
-     * Для полноценной регистрации используется отдельный метод
-     * {@link ru.skypro.homework.service.AuthService#register(ru.skypro.homework.dto.auth.RegisterDto)}.
+     *
+     * <p><b>Примечание:</b> Этот метод не используется при регистрации, так как стандартный {@link
+     * UserDetails} не содержит полей firstName, lastName, phone. Для полноценной регистрации
+     * используется отдельный метод {@link
+     * ru.skypro.homework.service.AuthService#register(ru.skypro.homework.dto.auth.RegisterDto)}.
      *
      * @param user данные пользователя (только username, password, roles)
      * @throws UnsupportedOperationException всегда, так как метод не реализован
@@ -90,28 +99,42 @@ public class DatabaseUserDetailsManager implements UserDetailsManager {
      */
     @Override
     public void deleteUser(String username) {
-        UsersDao user = userRepository.findByEmail(username)
-                                      .orElseThrow(() -> new UserNotFoundException(String.format(ExceptionMessages.USER_NOT_FOUND, username)));
+        UsersDao user =
+                userRepository
+                        .findByEmail(username)
+                        .orElseThrow(
+                                () ->
+                                        new UserNotFoundException(
+                                                String.format(
+                                                        ExceptionMessages.USER_NOT_FOUND,
+                                                        username)));
         userRepository.delete(user);
     }
 
     /**
      * Изменяет пароль текущего аутентифицированного пользователя.
-     * <p>
-     * Получает имя пользователя из контекста безопасности, загружает его из БД,
-     * проверяет соответствие старого пароля (через {@link PasswordEncoder#matches}),
-     * кодирует новый пароль и сохраняет обновлённую сущность.
+     *
+     * <p>Получает имя пользователя из контекста безопасности, загружает его из БД, проверяет
+     * соответствие старого пароля (через {@link PasswordEncoder#matches}), кодирует новый пароль и
+     * сохраняет обновлённую сущность.
      *
      * @param oldPassword старый пароль (в открытом виде)
      * @param newPassword новый пароль (в открытом виде)
-     * @throws UserNotFoundException          если пользователь не найден в БД
+     * @throws UserNotFoundException если пользователь не найден в БД
      * @throws InvalidCurrentPasswordException если старый пароль не совпадает
      */
     @Override
     public void changePassword(String oldPassword, String newPassword) {
         String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-        UsersDao user = userRepository.findByEmail(currentUsername)
-                                      .orElseThrow(() -> new UserNotFoundException(String.format(ExceptionMessages.USER_NOT_FOUND, currentUsername)));
+        UsersDao user =
+                userRepository
+                        .findByEmail(currentUsername)
+                        .orElseThrow(
+                                () ->
+                                        new UserNotFoundException(
+                                                String.format(
+                                                        ExceptionMessages.USER_NOT_FOUND,
+                                                        currentUsername)));
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
             throw new InvalidCurrentPasswordException(ExceptionMessages.INVALID_CURRENT_PASSWORD);
         }

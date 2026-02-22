@@ -2,8 +2,7 @@ package ru.skypro.homework.constants;
 
 public final class ValidationConstants {
 
-    private ValidationConstants() {
-    }
+    private ValidationConstants() {}
 
     // ------ Пользователь (авторизация и регистрация) ------
     public static final int USERNAME_MIN_SIZE = 10;

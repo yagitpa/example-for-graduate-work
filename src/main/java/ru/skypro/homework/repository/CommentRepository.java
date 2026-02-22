@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
 import ru.skypro.homework.model.CommentsDao;
 
 import java.util.List;
@@ -26,7 +27,7 @@ public interface CommentRepository extends JpaRepository<CommentsDao, Integer> {
     /**
      * Поиск комментария по его идентификатору и идентификатору объявления.
      *
-     * @param pk   идентификатор комментария (comment.pk)
+     * @param pk идентификатор комментария (comment.pk)
      * @param adPk идентификатор объявления (ad.pk)
      * @return Optional с комментарием или пустой Optional
      */
@@ -35,7 +36,7 @@ public interface CommentRepository extends JpaRepository<CommentsDao, Integer> {
     /**
      * Поиск комментария по его идентификатору и идентификатору автора.
      *
-     * @param pk      идентификатор комментария (comment.pk)
+     * @param pk идентификатор комментария (comment.pk)
      * @param authorId идентификатор автора (author.id)
      * @return Optional с комментарием или пустой Optional
      */
@@ -44,9 +45,10 @@ public interface CommentRepository extends JpaRepository<CommentsDao, Integer> {
     // ---------- Методы с пагинацией ----------
 
     /**
-     * Получение комментариев к объявлению с пагинацией и сортировкой по дате создания (новые первыми).
+     * Получение комментариев к объявлению с пагинацией и сортировкой по дате создания (новые
+     * первыми).
      *
-     * @param adPk     идентификатор объявления (ad.pk)
+     * @param adPk идентификатор объявления (ad.pk)
      * @param pageable параметры пагинации и сортировки
      * @return страница комментариев
      */

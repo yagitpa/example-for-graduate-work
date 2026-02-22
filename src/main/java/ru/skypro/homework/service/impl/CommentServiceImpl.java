@@ -2,8 +2,10 @@ package ru.skypro.homework.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import ru.skypro.homework.constants.ExceptionMessages;
 import ru.skypro.homework.dto.auth.Role;
 import ru.skypro.homework.dto.comment.CommentDto;
@@ -25,9 +27,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Реализация сервиса {@link CommentService}.
- * Обеспечивает операции с комментариями, включая проверку прав доступа
- * (автор комментария или администратор).
+ * Реализация сервиса {@link CommentService}. Обеспечивает операции с комментариями, включая
+ * проверку прав доступа (автор комментария или администратор).
  *
  * @see CommentService
  * @see CommentRepository
@@ -54,9 +55,8 @@ public class CommentServiceImpl implements CommentService {
             throw new AdNotFoundException(String.format(ExceptionMessages.AD_NOT_FOUND, adId));
         }
         List<CommentsDao> comments = commentRepository.findByAdPkOrderByCreatedAtDesc(adId);
-        List<CommentDto> commentDtos = comments.stream()
-                                               .map(commentMapper::toCommentDto)
-                                               .collect(Collectors.toList());
+        List<CommentDto> commentDtos =
+                comments.stream().map(commentMapper::toCommentDto).collect(Collectors.toList());
         CommentsDto result = new CommentsDto();
         result.setCount(commentDtos.size());
         result.setResults(commentDtos);
@@ -73,7 +73,11 @@ public class CommentServiceImpl implements CommentService {
         comment.setAd(ad);
         CommentsDao savedComment = commentRepository.save(comment);
 
-        log.info("Comment added with id: {} to ad: {} by user: {}", savedComment.getPk(), adId, author.getEmail());
+        log.info(
+                "Comment added with id: {} to ad: {} by user: {}",
+                savedComment.getPk(),
+                adId,
+                author.getEmail());
         return commentMapper.toCommentDto(savedComment);
     }
 
@@ -83,36 +87,57 @@ public class CommentServiceImpl implements CommentService {
         CommentsDao comment = getCommentByIdAndAdId(commentId, adId);
         checkPermissions(comment, currentUser);
         commentRepository.delete(comment);
-        log.info("Comment deleted with id: {} from ad: {} by user: {}", commentId, adId, currentUser.getEmail());
+        log.info(
+                "Comment deleted with id: {} from ad: {} by user: {}",
+                commentId,
+                adId,
+                currentUser.getEmail());
     }
 
     @Override
-    public CommentDto updateComment(Integer adId, Integer commentId, CreateOrUpdateCommentDto updateComment) {
+    public CommentDto updateComment(
+            Integer adId, Integer commentId, CreateOrUpdateCommentDto updateComment) {
         UsersDao currentUser = currentUserService.getCurrentUser();
         CommentsDao comment = getCommentByIdAndAdId(commentId, adId);
         checkPermissions(comment, currentUser);
         commentMapper.updateCommentFromDto(updateComment, comment);
         CommentsDao updatedComment = commentRepository.save(comment);
-        log.info("Comment updated with id: {} in ad: {} by user: {}", commentId, adId, currentUser.getEmail());
+        log.info(
+                "Comment updated with id: {} in ad: {} by user: {}",
+                commentId,
+                adId,
+                currentUser.getEmail());
         return commentMapper.toCommentDto(updatedComment);
     }
 
     private AdsDao getAdById(Integer adId) {
-        return adRepository.findById(adId)
-                           .orElseThrow(() -> new AdNotFoundException(String.format(ExceptionMessages.AD_NOT_FOUND, adId)));
+        return adRepository
+                .findById(adId)
+                .orElseThrow(
+                        () ->
+                                new AdNotFoundException(
+                                        String.format(ExceptionMessages.AD_NOT_FOUND, adId)));
     }
 
     private CommentsDao getCommentByIdAndAdId(Integer commentId, Integer adId) {
-        return commentRepository.findByPkAndAdPk(commentId, adId)
-                                .orElseThrow(() -> new CommentNotFoundException(
-                                        String.format(String.format(ExceptionMessages.COMMENT_NOT_FOUND, commentId, adId))));
+        return commentRepository
+                .findByPkAndAdPk(commentId, adId)
+                .orElseThrow(
+                        () ->
+                                new CommentNotFoundException(
+                                        String.format(
+                                                String.format(
+                                                        ExceptionMessages.COMMENT_NOT_FOUND,
+                                                        commentId,
+                                                        adId))));
     }
 
     private void checkPermissions(CommentsDao comment, UsersDao user) {
         boolean isAuthor = comment.getAuthor().getId().equals(user.getId());
         boolean isAdmin = user.getRole() == Role.ADMIN;
         if (!isAuthor && !isAdmin) {
-            throw new UnauthorizedAccessException(String.format(ExceptionMessages.UNAUTHORIZED_ACCESS, "comment"));
+            throw new UnauthorizedAccessException(
+                    String.format(ExceptionMessages.UNAUTHORIZED_ACCESS, "comment"));
         }
     }
 }

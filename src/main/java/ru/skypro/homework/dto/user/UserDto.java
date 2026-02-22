@@ -1,10 +1,12 @@
 package ru.skypro.homework.dto.user;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
-import ru.skypro.homework.dto.auth.Role;
-
 import static ru.skypro.homework.constants.ValidationConstants.PHONE_EXAMPLE;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+
+import lombok.Data;
+
+import ru.skypro.homework.dto.auth.Role;
 
 @Data
 @Schema(description = "DTO для отображения информации о пользователе")
@@ -26,7 +28,9 @@ public class UserDto {
     private String phone;
 
     @Schema(
-            description = "Роль пользователя", allowableValues = {"USER", "ADMIN"}, example = "USER")
+            description = "Роль пользователя",
+            allowableValues = {"USER", "ADMIN"},
+            example = "USER")
     private Role role;
 
     @Schema(

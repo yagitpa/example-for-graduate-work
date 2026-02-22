@@ -1,6 +1,7 @@
 package ru.skypro.homework.util;
 
 import lombok.experimental.UtilityClass;
+
 import org.springframework.util.StringUtils;
 
 @UtilityClass

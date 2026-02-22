@@ -6,6 +6,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 import org.mapstruct.NullValuePropertyMappingStrategy;
+
 import ru.skypro.homework.config.MapStructConfig;
 import ru.skypro.homework.dto.comment.CommentDto;
 import ru.skypro.homework.dto.comment.CreateOrUpdateCommentDto;
@@ -21,7 +22,10 @@ public interface CommentMapper {
     @Mapping(source = "author.id", target = "author")
     @Mapping(source = "author.image", target = "authorImage")
     @Mapping(source = "author.firstName", target = "authorFirstName")
-    @Mapping(source = "createdAt", target = "createdAt", qualifiedByName = "localDateTimeToEpochMillis")
+    @Mapping(
+            source = "createdAt",
+            target = "createdAt",
+            qualifiedByName = "localDateTimeToEpochMillis")
     CommentDto toCommentDto(CommentsDao entity);
 
     @Mapping(target = "pk", ignore = true)

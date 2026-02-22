@@ -25,13 +25,15 @@ public abstract class AbstractIntegrationTest {
         System.setProperty("docker.client.version", "1.44");
         // Отключаем Ryuk (рекомендуется для CI)
         System.setProperty("testcontainers.ryuk.disabled", "true");
-        Duration timeout = "true".equals(System.getenv("CI")) ? Duration.ofMinutes(3) : Duration.ofMinutes(1);
-        postgres = new PostgreSQLContainer<>("postgres:15")
-                .withDatabaseName("testdb")
-                .withUsername("test")
-                .withPassword("test")
-                .withExposedPorts(5432)
-                .withStartupTimeout(timeout);
+        Duration timeout =
+                "true".equals(System.getenv("CI")) ? Duration.ofMinutes(3) : Duration.ofMinutes(1);
+        postgres =
+                new PostgreSQLContainer<>("postgres:15")
+                        .withDatabaseName("testdb")
+                        .withUsername("test")
+                        .withPassword("test")
+                        .withExposedPorts(5432)
+                        .withStartupTimeout(timeout);
         postgres.start();
         Runtime.getRuntime().addShutdownHook(new Thread(postgres::stop));
     }
@@ -47,14 +49,11 @@ public abstract class AbstractIntegrationTest {
         registry.add("spring.datasource.hikari.validation-timeout", () -> "60000");
     }
 
-    @LocalServerPort
-    protected int port;
+    @LocalServerPort protected int port;
 
-    @Autowired
-    protected TestRestTemplate restTemplate;
+    @Autowired protected TestRestTemplate restTemplate;
 
-    @Autowired
-    protected PasswordEncoder passwordEncoder;
+    @Autowired protected PasswordEncoder passwordEncoder;
 
     protected String baseUrl() {
         return "http://localhost:" + port;
@@ -65,8 +64,13 @@ public abstract class AbstractIntegrationTest {
     }
 
     // Для PATCH-запросов с телом (не multipart)
-    protected <T> ResponseEntity<T> patchWithAuth(String url, Object request, Class<T> responseType,
-                                                  String username, String password, Object... uriVariables) {
+    protected <T> ResponseEntity<T> patchWithAuth(
+            String url,
+            Object request,
+            Class<T> responseType,
+            String username,
+            String password,
+            Object... uriVariables) {
         HttpHeaders headers = new HttpHeaders();
         headers.setBasicAuth(username, password);
         HttpEntity<?> entity = new HttpEntity<>(request, headers);
@@ -74,9 +78,13 @@ public abstract class AbstractIntegrationTest {
     }
 
     // Для multipart PATCH-запросов (например, обновление изображения)
-    protected <T> ResponseEntity<T> patchMultipartWithAuth(String url, MultiValueMap<String, Object> body,
-                                                           Class<T> responseType, String username, String password,
-                                                           Object... uriVariables) {
+    protected <T> ResponseEntity<T> patchMultipartWithAuth(
+            String url,
+            MultiValueMap<String, Object> body,
+            Class<T> responseType,
+            String username,
+            String password,
+            Object... uriVariables) {
         HttpHeaders headers = new HttpHeaders();
         headers.setBasicAuth(username, password);
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);

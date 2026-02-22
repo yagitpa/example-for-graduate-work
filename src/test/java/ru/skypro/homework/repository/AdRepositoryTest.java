@@ -1,8 +1,11 @@
 package ru.skypro.homework.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+
 import ru.skypro.homework.AbstractIntegrationTest;
 import ru.skypro.homework.dto.auth.Role;
 import ru.skypro.homework.model.AdsDao;
@@ -10,16 +13,12 @@ import ru.skypro.homework.model.UsersDao;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 @Transactional
 class AdRepositoryTest extends AbstractIntegrationTest {
 
-    @Autowired
-    private AdRepository adRepository;
+    @Autowired private AdRepository adRepository;
 
-    @Autowired
-    private UserRepository userRepository;
+    @Autowired private UserRepository userRepository;
 
     private UsersDao createTestUser(String email) {
         UsersDao user = new UsersDao();

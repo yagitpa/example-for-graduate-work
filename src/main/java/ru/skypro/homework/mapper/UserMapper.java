@@ -5,6 +5,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
+
 import ru.skypro.homework.config.MapStructConfig;
 import ru.skypro.homework.dto.auth.RegisterDto;
 import ru.skypro.homework.dto.user.UpdateUserDto;

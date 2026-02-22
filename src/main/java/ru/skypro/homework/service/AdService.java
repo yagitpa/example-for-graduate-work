@@ -1,29 +1,27 @@
 package ru.skypro.homework.service;
 
 import org.springframework.web.multipart.MultipartFile;
+
 import ru.skypro.homework.dto.ad.AdDto;
 import ru.skypro.homework.dto.ad.AdsDto;
 import ru.skypro.homework.dto.ad.CreateOrUpdateAdDto;
 import ru.skypro.homework.dto.ad.ExtendedAdDto;
 
 /**
- * Сервис для работы с объявлениями.
- * Предоставляет методы для получения, создания, обновления, удаления объявлений,
- * а также для управления изображениями объявлений.
+ * Сервис для работы с объявлениями. Предоставляет методы для получения, создания, обновления,
+ * удаления объявлений, а также для управления изображениями объявлений.
  */
 public interface AdService {
 
-    /**
-     * Получение всех объявлений.
-     */
+    /** Получение всех объявлений. */
     AdsDto getAllAds();
 
     /**
      * Добавление нового объявления.
      *
-     * @param email      email автора (из Authentication)
+     * @param email email автора (из Authentication)
      * @param properties данные объявления
-     * @param image      файл изображения
+     * @param image файл изображения
      * @return созданное объявление (AdDto)
      */
     AdDto addAd(String email, CreateOrUpdateAdDto properties, MultipartFile image);
@@ -39,7 +37,7 @@ public interface AdService {
     /**
      * Удаление объявления.
      *
-     * @param id    идентификатор объявления
+     * @param id идентификатор объявления
      * @param email email текущего пользователя
      */
     void removeAd(Integer id, String email);
@@ -47,9 +45,9 @@ public interface AdService {
     /**
      * Обновление информации об объявлении.
      *
-     * @param id         идентификатор объявления
-     * @param email      email текущего пользователя
-     * @param updateAd   новые данные
+     * @param id идентификатор объявления
+     * @param email email текущего пользователя
+     * @param updateAd новые данные
      * @return обновлённое объявление (AdDto)
      */
     AdDto updateAd(Integer id, String email, CreateOrUpdateAdDto updateAd);
@@ -64,7 +62,7 @@ public interface AdService {
     /**
      * Обновление картинки объявления.
      *
-     * @param id    идентификатор объявления
+     * @param id идентификатор объявления
      * @param email email текущего пользователя
      * @param image новый файл изображения
      * @return обновлённое изображение в виде байт

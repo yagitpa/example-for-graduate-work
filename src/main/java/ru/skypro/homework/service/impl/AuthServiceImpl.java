@@ -2,6 +2,7 @@ package ru.skypro.homework.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -9,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import ru.skypro.homework.constants.ExceptionMessages;
 import ru.skypro.homework.dto.auth.RegisterDto;
 import ru.skypro.homework.exception.UserAlreadyExistsException;
@@ -18,10 +20,9 @@ import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.AuthService;
 
 /**
- * Реализация сервиса {@link AuthService}.
- * Использует {@link AuthenticationManager} для аутентификации,
- * {@link UserRepository} для проверки существования пользователя,
- * {@link PasswordEncoder} для шифрования пароля при регистрации.
+ * Реализация сервиса {@link AuthService}. Использует {@link AuthenticationManager} для
+ * аутентификации, {@link UserRepository} для проверки существования пользователя, {@link
+ * PasswordEncoder} для шифрования пароля при регистрации.
  *
  * @see AuthService
  * @see UserRepository
@@ -41,9 +42,9 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void login(String userName, String password) {
         try {
-            Authentication auth = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(userName, password)
-            );
+            Authentication auth =
+                    authenticationManager.authenticate(
+                            new UsernamePasswordAuthenticationToken(userName, password));
             SecurityContextHolder.getContext().setAuthentication(auth);
             log.info("User {} successfully authenticated", userName);
         } catch (BadCredentialsException e) {
@@ -56,7 +57,9 @@ public class AuthServiceImpl implements AuthService {
     public void register(RegisterDto registerDto) {
         if (userRepository.existsByEmail(registerDto.getUsername())) {
             log.warn("Registration failed: user {} already exists", registerDto.getUsername());
-            throw new UserAlreadyExistsException(String.format(ExceptionMessages.USER_ALREADY_EXISTS, registerDto.getUsername()));
+            throw new UserAlreadyExistsException(
+                    String.format(
+                            ExceptionMessages.USER_ALREADY_EXISTS, registerDto.getUsername()));
         }
         UsersDao user = userMapper.toUserEntity(registerDto);
         user.setPassword(passwordEncoder.encode(registerDto.getPassword()));

@@ -1,6 +1,7 @@
 package ru.skypro.homework.dto.ad;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import lombok.Data;
 
 @Data
@@ -10,7 +11,10 @@ public class AdDto {
     @Schema(description = "ID автора объявления", example = "1")
     private Integer author;
 
-    @Schema(description = "Ссылка на картинку объявления", example = "/ads-images/image.jpg", nullable = true)
+    @Schema(
+            description = "Ссылка на картинку объявления",
+            example = "/ads-images/image.jpg",
+            nullable = true)
     private String image;
 
     @Schema(description = "ID объявления", example = "1")

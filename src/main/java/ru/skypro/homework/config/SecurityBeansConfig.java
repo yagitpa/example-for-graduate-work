@@ -10,8 +10,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
- * Конфигурация для предотвращения циклической зависимости в WebSecurityConfig
- * Вынесены методы в отдельный класс
+ * Конфигурация для предотвращения циклической зависимости в WebSecurityConfig Вынесены методы в
+ * отдельный класс
  */
 @Configuration
 public class SecurityBeansConfig {
@@ -22,13 +22,15 @@ public class SecurityBeansConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(HttpSecurity http,
-                                                       UserDetailsService userDetailsService,
-                                                       PasswordEncoder passwordEncoder) throws Exception {
+    public AuthenticationManager authenticationManager(
+            HttpSecurity http,
+            UserDetailsService userDetailsService,
+            PasswordEncoder passwordEncoder)
+            throws Exception {
         return http.getSharedObject(AuthenticationManagerBuilder.class)
-                   .userDetailsService(userDetailsService)
-                   .passwordEncoder(passwordEncoder)
-                   .and()
-                   .build();
+                .userDetailsService(userDetailsService)
+                .passwordEncoder(passwordEncoder)
+                .and()
+                .build();
     }
 }
