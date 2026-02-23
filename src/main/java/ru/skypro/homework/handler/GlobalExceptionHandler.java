@@ -20,6 +20,7 @@ import ru.skypro.homework.exception.CommentNotFoundException;
 import ru.skypro.homework.exception.ImageNotFoundException;
 import ru.skypro.homework.exception.ImageReadException;
 import ru.skypro.homework.exception.InvalidCurrentPasswordException;
+import ru.skypro.homework.exception.InvalidImageException;
 import ru.skypro.homework.exception.UnauthorizedAccessException;
 import ru.skypro.homework.exception.UserAlreadyExistsException;
 import ru.skypro.homework.exception.UserNotFoundException;
@@ -133,6 +134,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<?> handleAuthenticationException(AuthenticationException e) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+
+    @ExceptionHandler(InvalidImageException.class)
+    public ResponseEntity<?> handleInvalidImage(InvalidImageException e) {
+        log.error("Invalid image: {}", e.getMessage());
+        return ResponseEntity.badRequest().body(e.getMessage());
     }
 
     @Data

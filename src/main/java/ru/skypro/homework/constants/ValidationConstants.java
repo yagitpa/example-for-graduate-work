@@ -1,5 +1,7 @@
 package ru.skypro.homework.constants;
 
+import java.util.List;
+
 public final class ValidationConstants {
 
     private ValidationConstants() {}
@@ -33,4 +35,8 @@ public final class ValidationConstants {
     // ----- Комментарии -----
     public static final int COMMENT_TEXT_MIN_SIZE = 8;
     public static final int COMMENT_TEXT_MAX_SIZE = 512;
+
+    // ----- Изображения -----
+    public static final List<String> ALLOWED_CONTENT_TYPES = List.of("image/jpeg", "image/png", "image/gif", "image/bmp", "image/webp");
+    public static final long MAX_FILE_SIZE = 5 * 1024 * 1024;
 }
