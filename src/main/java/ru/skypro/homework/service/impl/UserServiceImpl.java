@@ -78,12 +78,18 @@ public class UserServiceImpl implements UserService {
     @Override
     public void updateUserImage(MultipartFile image) {
         UsersDao user = currentUserService.getCurrentUser();
-        String newImagePath =
-                imageService.saveImage(image, avatarDir, UrlPrefixConstants.URL_PREFIX_AVATARS);
-        if (user.getImage() != null) {
-            imageService.deleteImage(user.getImage(), avatarDir);
+        String oldImagePath = user.getImage(); // запоминаем старый путь
+
+        // Удаляем старый файл, если он есть (до сохранения нового)
+        if (oldImagePath != null) {
+            imageService.deleteImage(oldImagePath, avatarDir);
         }
+
+        // Сохраняем новый аватар
+        String newImagePath = imageService.saveAvatar(image, user.getId(), UrlPrefixConstants.URL_PREFIX_AVATARS);
         user.setImage(newImagePath);
         userRepository.save(user);
+
+        log.info("Аватар пользователя {} обновлён, новый путь: {}", user.getId(), newImagePath);
     }
 }

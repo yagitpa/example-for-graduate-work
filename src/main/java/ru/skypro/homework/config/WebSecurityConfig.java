@@ -23,14 +23,15 @@ public class WebSecurityConfig {
     private final UserDetailsService userDetailsService;
 
     private static final String[] AUTH_WHITELIST = {
-        "/swagger-resources/**",
-        "/swagger-ui.html",
-        "/v3/api-docs",
-        "/webjars/**",
-        "/login",
-        "/register",
-        "/ads-images/**",
-        "/avatars/**"
+            "/swagger-resources/**",
+            "/swagger-ui.html",
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+            "/webjars/**",
+            "/login",
+            "/register",
+            "/ads-images/**",
+            "/avatars/**"
     };
 
     @Bean
