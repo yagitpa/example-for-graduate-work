@@ -25,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.user.NewPasswordDto;
 import ru.skypro.homework.dto.user.UpdateUserDto;
 import ru.skypro.homework.dto.user.UserDto;
+import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.UserService;
 
 import javax.validation.Valid;
@@ -38,6 +39,8 @@ import javax.validation.Valid;
 public class UserController {
 
     private final UserService userService;
+
+    private final UserRepository userRepository;
 
     @Operation(summary = "Обновление пароля")
     @ApiResponses(
@@ -88,8 +91,8 @@ public class UserController {
                 @ApiResponse(responseCode = "401", description = "Пользователь не авторизован")
             })
     @PatchMapping(value = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Void> updateUserImage(@RequestParam("image") MultipartFile image) {
+    public ResponseEntity<UserDto> updateUserImage(@RequestParam("image") MultipartFile image) {
         userService.updateUserImage(image);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(userService.getUser());
     }
 }

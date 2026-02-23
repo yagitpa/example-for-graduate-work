@@ -18,10 +18,14 @@ import ru.skypro.homework.exception.ImageReadException;
 import ru.skypro.homework.exception.ImageSaveException;
 import ru.skypro.homework.exception.InvalidImageException;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
 import javax.annotation.PostConstruct;
@@ -74,14 +78,45 @@ public class ImageService {
             String extension = getExtension(image.getOriginalFilename());
             String filename = UUID.randomUUID() + extension;
             Path uploadPath = Paths.get(directory);
-            if (!Files.exists(uploadPath)) {
-                Files.createDirectories(uploadPath);
-            }
+            // Логируем полный путь и имя файла
+            log.debug("Сохранение изображения в директорию: {}, имя файла: {}", uploadPath.toAbsolutePath(), filename);
+            Files.createDirectories(uploadPath);
             Path filePath = uploadPath.resolve(filename);
             image.transferTo(filePath.toFile());
+            log.info("Изображение успешно сохранено: {}", filePath.toAbsolutePath());
             return urlPrefix + filename;
         } catch (IOException e) {
-            log.error("Failed to save image to {}", directory, e);
+            log.error("Ошибка сохранения изображения в {}", directory, e);
+            throw new ImageSaveException(ExceptionMessages.IMAGE_FAILED_TO_SAVE, e);
+        }
+    }
+
+    public String saveAvatar(MultipartFile image, Integer userId, String urlPrefix) {
+        validateImage(image);
+        try {
+            String extension = getExtension(image.getOriginalFilename());
+            String filename = userId + extension;
+            Path uploadPath = Paths.get(avatarDir);
+            log.debug("Сохранение аватара для userId={} в директорию: {}, имя файла: {}", userId, uploadPath.toAbsolutePath(), filename);
+
+            Files.createDirectories(uploadPath);
+            Path filePath = uploadPath.resolve(filename);
+
+            // Сохраняем через Files.write (просто и надёжно)
+            byte[] bytes = image.getBytes();
+            Files.write(filePath, bytes);
+
+            // Проверяем, что файл действительно создан
+            if (Files.exists(filePath)) {
+                long size = Files.size(filePath);
+                log.info("Файл {} успешно создан, размер: {} байт", filePath.toAbsolutePath(), size);
+            } else {
+                log.error("Файл {} НЕ СУЩЕСТВУЕТ после записи!", filePath.toAbsolutePath());
+            }
+
+            return urlPrefix + filename;
+        } catch (IOException e) {
+            log.error("Ошибка сохранения аватара для пользователя {}", userId, e);
             throw new ImageSaveException(ExceptionMessages.IMAGE_FAILED_TO_SAVE, e);
         }
     }
