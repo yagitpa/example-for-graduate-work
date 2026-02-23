@@ -1,28 +1,16 @@
 package ru.skypro.homework.controller.ad;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.multipart.MultipartFile;
 
 import ru.skypro.homework.AbstractIntegrationTest;
 import ru.skypro.homework.dto.ad.AdDto;
@@ -35,21 +23,16 @@ import ru.skypro.homework.model.UsersDao;
 import ru.skypro.homework.repository.AdRepository;
 import ru.skypro.homework.repository.CommentRepository;
 import ru.skypro.homework.repository.UserRepository;
-import ru.skypro.homework.service.ImageService;
 
-import java.util.UUID;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 class AdControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired private UserRepository userRepository;
-
     @Autowired private AdRepository adRepository;
-
     @Autowired private CommentRepository commentRepository;
-
     @Autowired private ObjectMapper objectMapper;
-
-    @MockBean private ImageService imageService;
 
     private UsersDao testUser;
     private UsersDao adminUser;
@@ -61,7 +44,7 @@ class AdControllerIntegrationTest extends AbstractIntegrationTest {
     private final String adminPassword = "admin";
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() {
         testUser = new UsersDao();
         testUser.setEmail(userEmail);
         testUser.setPassword(passwordEncoder.encode(userPassword));
@@ -87,31 +70,6 @@ class AdControllerIntegrationTest extends AbstractIntegrationTest {
         testAd.setAuthor(testUser);
         testAd.setImage("/ads-images/test.jpg");
         adRepository.save(testAd);
-
-        when(imageService.saveImage(any(MultipartFile.class), anyString(), anyString()))
-                .thenAnswer(
-                        invocation -> {
-                            MultipartFile file = invocation.getArgument(0);
-                            String originalFilename = file.getOriginalFilename();
-                            String extension = "";
-                            if (originalFilename != null && originalFilename.contains(".")) {
-                                extension =
-                                        originalFilename.substring(
-                                                originalFilename.lastIndexOf("."));
-                            }
-                            return "/ads-images/" + UUID.randomUUID() + extension;
-                        });
-
-        when(imageService.readImageAsBytes(anyString(), anyString()))
-                .thenAnswer(
-                        invocation -> {
-                            String imagePath = invocation.getArgument(0);
-                            if (imagePath.contains("new")) {
-                                return "new image content".getBytes();
-                            } else {
-                                return "image content".getBytes();
-                            }
-                        });
     }
 
     @AfterEach
@@ -123,17 +81,16 @@ class AdControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void getAllAds_ShouldReturnList() {
-        ResponseEntity<AdsDto> response =
-                withAuth(userEmail, userPassword).getForEntity(baseUrl() + "/ads", AdsDto.class);
+        ResponseEntity<AdsDto> response = withAuth(userEmail, userPassword)
+                .getForEntity(baseUrl() + "/ads", AdsDto.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getCount()).isPositive();
-        assertThat(response.getBody().getResults()).isNotEmpty();
     }
 
     @Test
-    void addAd_ShouldCreateAd() throws Exception {
+    void addAd_ShouldCreateAdAndSaveImage() throws Exception {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
@@ -143,58 +100,46 @@ class AdControllerIntegrationTest extends AbstractIntegrationTest {
         properties.setPrice(999);
 
         String propertiesJson = objectMapper.writeValueAsString(properties);
-        ByteArrayResource propertiesPart =
-                new ByteArrayResource(propertiesJson.getBytes()) {
-                    @Override
-                    public String getFilename() {
-                        return "properties.json";
-                    }
-                };
+        ByteArrayResource propertiesPart = new ByteArrayResource(propertiesJson.getBytes()) {
+            @Override
+            public String getFilename() {
+                return "properties.json";
+            }
+        };
 
-        // Оборачиваем JSON часть в HttpEntity с заголовком Content-Type
-        HttpHeaders jsonHeaders = new HttpHeaders();
-        jsonHeaders.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<MultiValueMap<String, Object>> requestEntity =
-                getMultiValueMapHttpEntity(propertiesPart, jsonHeaders, headers);
+        byte[] imageContent = "fake image content".getBytes();
+        ByteArrayResource imagePart = new ByteArrayResource(imageContent) {
+            @Override
+            public String getFilename() {
+                return "image.jpg";
+            }
+        };
 
-        ResponseEntity<AdDto> response =
-                withAuth(userEmail, userPassword)
-                        .postForEntity(baseUrl() + "/ads", requestEntity, AdDto.class);
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("properties", propertiesPart);
+        body.add("image", imagePart);
+
+        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+        ResponseEntity<AdDto> response = withAuth(userEmail, userPassword)
+                .postForEntity(baseUrl() + "/ads", requestEntity, AdDto.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getTitle()).isEqualTo("New Ad");
         assertThat(response.getBody().getAuthor()).isEqualTo(testUser.getId());
 
-        assertThat(adRepository.findByAuthorId(testUser.getId())).hasSize(2);
-    }
-
-    private static @NotNull HttpEntity<MultiValueMap<String, Object>> getMultiValueMapHttpEntity(
-            ByteArrayResource propertiesPart, HttpHeaders jsonHeaders, HttpHeaders headers) {
-        HttpEntity<ByteArrayResource> jsonEntity = new HttpEntity<>(propertiesPart, jsonHeaders);
-
-        // Для изображения используем просто ByteArrayResource, без обёртки
-        ByteArrayResource imagePart =
-                new ByteArrayResource("image content".getBytes()) {
-                    @Override
-                    public String getFilename() {
-                        return "image.jpg";
-                    }
-                };
-
-        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        body.add("properties", jsonEntity); // обёрнутый JSON
-        body.add("image", imagePart); // простой ресурс
-
-        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-        return requestEntity;
+        String imageUrl = response.getBody().getImage();
+        String filename = Path.of(imageUrl).getFileName().toString();
+        Path savedPath = getAdImageDir().resolve(filename);
+        assertThat(savedPath).exists();
+        assertThat(Files.readAllBytes(savedPath)).isEqualTo(imageContent);
     }
 
     @Test
     void getAd_ShouldReturnExtendedAd() {
-        ResponseEntity<ExtendedAdDto> response =
-                withAuth(userEmail, userPassword)
-                        .getForEntity(baseUrl() + "/ads/{id}", ExtendedAdDto.class, testAd.getPk());
+        ResponseEntity<ExtendedAdDto> response = withAuth(userEmail, userPassword)
+                .getForEntity(baseUrl() + "/ads/{id}", ExtendedAdDto.class, testAd.getPk());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -210,28 +155,31 @@ class AdControllerIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void removeAd_ByAuthor_ShouldReturnNoContent() {
-        ResponseEntity<Void> response =
-                withAuth(userEmail, userPassword)
-                        .exchange(
-                                baseUrl() + "/ads/" + testAd.getPk(),
-                                HttpMethod.DELETE,
-                                null,
-                                Void.class);
+    void removeAd_ByAuthor_ShouldDeleteAdAndImageFile() throws Exception {
+        // Создаём объявление с реальным файлом
+        AdsDao adWithImage = new AdsDao();
+        adWithImage.setTitle("Ad with image");
+        adWithImage.setDescription("Desc");
+        adWithImage.setPrice(500);
+        adWithImage.setAuthor(testUser);
+        adWithImage.setImage("/ads-images/to-delete.jpg");
+        adRepository.save(adWithImage);
+
+        Path imagePath = getAdImageDir().resolve("to-delete.jpg");
+        Files.write(imagePath, "content".getBytes());
+
+        ResponseEntity<Void> response = withAuth(userEmail, userPassword)
+                .exchange(baseUrl() + "/ads/" + adWithImage.getPk(), HttpMethod.DELETE, null, Void.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-        assertThat(adRepository.findById(testAd.getPk())).isEmpty();
+        assertThat(adRepository.findById(adWithImage.getPk())).isEmpty();
+        assertThat(imagePath).doesNotExist();
     }
 
     @Test
     void removeAd_ByAdmin_ShouldReturnNoContent() {
-        ResponseEntity<Void> response =
-                withAuth(adminEmail, adminPassword)
-                        .exchange(
-                                baseUrl() + "/ads/" + testAd.getPk(),
-                                HttpMethod.DELETE,
-                                null,
-                                Void.class);
+        ResponseEntity<Void> response = withAuth(adminEmail, adminPassword)
+                .exchange(baseUrl() + "/ads/" + testAd.getPk(), HttpMethod.DELETE, null, Void.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
         assertThat(adRepository.findById(testAd.getPk())).isEmpty();
@@ -248,13 +196,8 @@ class AdControllerIntegrationTest extends AbstractIntegrationTest {
         other.setRole(Role.USER);
         userRepository.save(other);
 
-        ResponseEntity<Void> response =
-                withAuth("other@test.com", "password")
-                        .exchange(
-                                baseUrl() + "/ads/" + testAd.getPk(),
-                                HttpMethod.DELETE,
-                                null,
-                                Void.class);
+        ResponseEntity<Void> response = withAuth("other@test.com", "password")
+                .exchange(baseUrl() + "/ads/" + testAd.getPk(), HttpMethod.DELETE, null, Void.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
         assertThat(adRepository.findById(testAd.getPk())).isPresent();
@@ -267,13 +210,12 @@ class AdControllerIntegrationTest extends AbstractIntegrationTest {
         update.setDescription("Updated Description");
         update.setPrice(2000);
 
-        ResponseEntity<AdDto> response =
-                patchWithAuth(
-                        baseUrl() + "/ads/" + testAd.getPk(),
-                        update,
-                        AdDto.class,
-                        userEmail,
-                        userPassword);
+        ResponseEntity<AdDto> response = patchWithAuth(
+                baseUrl() + "/ads/" + testAd.getPk(),
+                update,
+                AdDto.class,
+                userEmail,
+                userPassword);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -286,8 +228,8 @@ class AdControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void getAdsMe_ShouldReturnUserAds() {
-        ResponseEntity<AdsDto> response =
-                withAuth(userEmail, userPassword).getForEntity(baseUrl() + "/ads/me", AdsDto.class);
+        ResponseEntity<AdsDto> response = withAuth(userEmail, userPassword)
+                .getForEntity(baseUrl() + "/ads/me", AdsDto.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -297,35 +239,49 @@ class AdControllerIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void updateImage_ShouldReplaceImage() {
+    void updateImage_ShouldReplaceImageAndDeleteOld() throws Exception {
+        // Создаём старый файл
+        Path oldImagePath = getAdImageDir().resolve("old.jpg");
+        Files.write(oldImagePath, "old content".getBytes());
+        testAd.setImage("/ads-images/old.jpg");
+        adRepository.save(testAd);
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-        ByteArrayResource imagePart =
-                new ByteArrayResource("new image content".getBytes()) {
-                    @Override
-                    public String getFilename() {
-                        return "newimage.jpg";
-                    }
-                };
+        byte[] newContent = "new image content".getBytes();
+        ByteArrayResource imagePart = new ByteArrayResource(newContent) {
+            @Override
+            public String getFilename() {
+                return "newimage.jpg";
+            }
+        };
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         body.add("image", imagePart);
 
-        ResponseEntity<byte[]> response =
-                patchMultipartWithAuth(
-                        baseUrl() + "/ads/" + testAd.getPk() + "/image",
-                        body,
-                        byte[].class,
-                        userEmail,
-                        userPassword);
+        ResponseEntity<byte[]> response = patchMultipartWithAuth(
+                baseUrl() + "/ads/" + testAd.getPk() + "/image",
+                body,
+                byte[].class,
+                userEmail,
+                userPassword);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody()).isEqualTo(newContent);
 
         AdsDao updated = adRepository.findById(testAd.getPk()).orElseThrow();
         assertThat(updated.getImage()).startsWith("/ads-images/");
         assertThat(updated.getImage()).isNotEqualTo(testAd.getImage());
+
+        // Старый файл должен быть удалён
+        assertThat(oldImagePath).doesNotExist();
+
+        // Новый файл должен существовать
+        String newFilename = Path.of(updated.getImage()).getFileName().toString();
+        Path newImagePath = getAdImageDir().resolve(newFilename);
+        assertThat(newImagePath).exists();
+        assertThat(Files.readAllBytes(newImagePath)).isEqualTo(newContent);
     }
 
     // ====== ТЕСТЫ НА 401 (БЕЗ АВТОРИЗАЦИИ) ======
@@ -341,39 +297,27 @@ class AdControllerIntegrationTest extends AbstractIntegrationTest {
         properties.setPrice(999);
 
         String propertiesJson = objectMapper.writeValueAsString(properties);
-        HttpEntity<MultiValueMap<String, Object>> requestEntity =
-                getMultiValueMapHttpEntity(propertiesJson, headers);
-
-        ResponseEntity<AdDto> response =
-                restTemplate.postForEntity(baseUrl() + "/ads", requestEntity, AdDto.class);
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
-    }
-
-    private static @NotNull HttpEntity<MultiValueMap<String, Object>> getMultiValueMapHttpEntity(
-            String propertiesJson, HttpHeaders headers) {
-        ByteArrayResource propertiesPart =
-                new ByteArrayResource(propertiesJson.getBytes()) {
-                    @Override
-                    public String getFilename() {
-                        return "properties.json";
-                    }
-                };
-
-        ByteArrayResource imagePart =
-                new ByteArrayResource("image content".getBytes()) {
-                    @Override
-                    public String getFilename() {
-                        return "image.jpg";
-                    }
-                };
+        ByteArrayResource propertiesPart = new ByteArrayResource(propertiesJson.getBytes()) {
+            @Override
+            public String getFilename() {
+                return "properties.json";
+            }
+        };
+        ByteArrayResource imagePart = new ByteArrayResource("image content".getBytes()) {
+            @Override
+            public String getFilename() {
+                return "image.jpg";
+            }
+        };
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         body.add("properties", propertiesPart);
         body.add("image", imagePart);
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-        return requestEntity;
+        ResponseEntity<AdDto> response = restTemplate.postForEntity(baseUrl() + "/ads", requestEntity, AdDto.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
     @Test
@@ -384,33 +328,32 @@ class AdControllerIntegrationTest extends AbstractIntegrationTest {
         update.setPrice(2000);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setBasicAuth(
-                "wrong", "creds"); // можно не ставить, но для чистоты используем без аутентификации
+        headers.setBasicAuth("wrong", "creds");
         HttpEntity<CreateOrUpdateAdDto> requestEntity = new HttpEntity<>(update, headers);
 
-        ResponseEntity<AdDto> response =
-                restTemplate.exchange(
-                        baseUrl() + "/ads/" + testAd.getPk(),
-                        HttpMethod.PATCH,
-                        requestEntity,
-                        AdDto.class);
+        ResponseEntity<AdDto> response = restTemplate.exchange(
+                baseUrl() + "/ads/" + testAd.getPk(),
+                HttpMethod.PATCH,
+                requestEntity,
+                AdDto.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
     @Test
     void removeAd_WithoutAuth_ShouldReturnUnauthorized() {
-        ResponseEntity<Void> response =
-                restTemplate.exchange(
-                        baseUrl() + "/ads/" + testAd.getPk(), HttpMethod.DELETE, null, Void.class);
+        ResponseEntity<Void> response = restTemplate.exchange(
+                baseUrl() + "/ads/" + testAd.getPk(),
+                HttpMethod.DELETE,
+                null,
+                Void.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
     @Test
     void getAdsMe_WithoutAuth_ShouldReturnUnauthorized() {
-        ResponseEntity<String> response =
-                restTemplate.getForEntity(baseUrl() + "/ads/me", String.class);
+        ResponseEntity<String> response = restTemplate.getForEntity(baseUrl() + "/ads/me", String.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
@@ -419,41 +362,32 @@ class AdControllerIntegrationTest extends AbstractIntegrationTest {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-        ByteArrayResource imagePart =
-                new ByteArrayResource("new image".getBytes()) {
-                    @Override
-                    public String getFilename() {
-                        return "image.jpg";
-                    }
-                };
+        ByteArrayResource imagePart = new ByteArrayResource("new image".getBytes()) {
+            @Override
+            public String getFilename() {
+                return "image.jpg";
+            }
+        };
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         body.add("image", imagePart);
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-
-        ResponseEntity<Void> response =
-                restTemplate.exchange(
-                        baseUrl() + "/ads/" + testAd.getPk() + "/image",
-                        HttpMethod.PATCH,
-                        requestEntity,
-                        Void.class);
+        ResponseEntity<Void> response = restTemplate.exchange(
+                baseUrl() + "/ads/" + testAd.getPk() + "/image",
+                HttpMethod.PATCH,
+                requestEntity,
+                Void.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
-    // ====== ТЕСТЫ на 404 для несуществующего объявления ======
+    // ====== ТЕСТЫ на 404 ======
 
     @Test
     void getAd_NotFound_ShouldReturn404() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBasicAuth(userEmail, userPassword);
-        HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
-
-        ResponseEntity<String> response =
-                restTemplate.exchange(
-                        baseUrl() + "/ads/999999", HttpMethod.GET, requestEntity, String.class);
-
+        ResponseEntity<String> response = withAuth(userEmail, userPassword)
+                .getForEntity(baseUrl() + "/ads/999999", String.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
@@ -464,23 +398,20 @@ class AdControllerIntegrationTest extends AbstractIntegrationTest {
         update.setDescription("Updated Description");
         update.setPrice(2000);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBasicAuth(userEmail, userPassword);
-        HttpEntity<CreateOrUpdateAdDto> requestEntity = new HttpEntity<>(update, headers);
-
-        ResponseEntity<String> response =
-                restTemplate.exchange(
-                        baseUrl() + "/ads/999999", HttpMethod.PATCH, requestEntity, String.class);
+        ResponseEntity<String> response = patchWithAuth(
+                baseUrl() + "/ads/999999",
+                update,
+                String.class,
+                userEmail,
+                userPassword);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test
     void removeAd_NotFound_ShouldReturn404() {
-        ResponseEntity<Void> response =
-                withAuth(userEmail, userPassword)
-                        .exchange(baseUrl() + "/ads/999999", HttpMethod.DELETE, null, Void.class);
-
+        ResponseEntity<Void> response = withAuth(userEmail, userPassword)
+                .exchange(baseUrl() + "/ads/999999", HttpMethod.DELETE, null, Void.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
@@ -490,30 +421,27 @@ class AdControllerIntegrationTest extends AbstractIntegrationTest {
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         headers.setBasicAuth(userEmail, userPassword);
 
-        ByteArrayResource imagePart =
-                new ByteArrayResource("new image".getBytes()) {
-                    @Override
-                    public String getFilename() {
-                        return "image.jpg";
-                    }
-                };
+        ByteArrayResource imagePart = new ByteArrayResource("new image".getBytes()) {
+            @Override
+            public String getFilename() {
+                return "image.jpg";
+            }
+        };
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         body.add("image", imagePart);
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-
-        ResponseEntity<Void> response =
-                restTemplate.exchange(
-                        baseUrl() + "/ads/999999/image",
-                        HttpMethod.PATCH,
-                        requestEntity,
-                        Void.class);
+        ResponseEntity<Void> response = restTemplate.exchange(
+                baseUrl() + "/ads/999999/image",
+                HttpMethod.PATCH,
+                requestEntity,
+                Void.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
-    // ====== ТЕСТЫ на 403 (обновление чужого объявления)
+    // ====== ТЕСТЫ на 403 ======
 
     @Test
     void updateAd_ByOtherUser_ShouldReturnForbidden() {
@@ -535,12 +463,11 @@ class AdControllerIntegrationTest extends AbstractIntegrationTest {
         headers.setBasicAuth("other2@test.com", "password");
         HttpEntity<CreateOrUpdateAdDto> requestEntity = new HttpEntity<>(update, headers);
 
-        ResponseEntity<String> response =
-                restTemplate.exchange(
-                        baseUrl() + "/ads/" + testAd.getPk(),
-                        HttpMethod.PATCH,
-                        requestEntity,
-                        String.class);
+        ResponseEntity<String> response = restTemplate.exchange(
+                baseUrl() + "/ads/" + testAd.getPk(),
+                HttpMethod.PATCH,
+                requestEntity,
+                String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }

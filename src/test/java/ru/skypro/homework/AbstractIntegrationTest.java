@@ -1,19 +1,27 @@
 package ru.skypro.homework;
 
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.util.MultiValueMap;
 import org.testcontainers.containers.PostgreSQLContainer;
 
+import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Comparator;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public abstract class AbstractIntegrationTest {
@@ -21,21 +29,45 @@ public abstract class AbstractIntegrationTest {
     protected static final PostgreSQLContainer<?> postgres;
 
     static {
-        // Принудительно устанавливаем версию Docker API
         System.setProperty("docker.client.version", "1.44");
-        // Отключаем Ryuk (рекомендуется для CI)
         System.setProperty("testcontainers.ryuk.disabled", "true");
-        Duration timeout =
-                "true".equals(System.getenv("CI")) ? Duration.ofMinutes(3) : Duration.ofMinutes(1);
-        postgres =
-                new PostgreSQLContainer<>("postgres:15")
-                        .withDatabaseName("testdb")
-                        .withUsername("test")
-                        .withPassword("test")
-                        .withExposedPorts(5432)
-                        .withStartupTimeout(timeout);
+        Duration timeout = "true".equals(System.getenv("CI")) ? Duration.ofMinutes(3) : Duration.ofMinutes(1);
+        postgres = new PostgreSQLContainer<>("postgres:15")
+                .withDatabaseName("testdb")
+                .withUsername("test")
+                .withPassword("test")
+                .withExposedPorts(5432)
+                .withStartupTimeout(timeout);
         postgres.start();
         Runtime.getRuntime().addShutdownHook(new Thread(postgres::stop));
+    }
+
+    private static Path tempAvatarDir;
+    private static Path tempAdImageDir;
+
+    @BeforeAll
+    static void createTempDirectories() throws IOException {
+        tempAvatarDir = Files.createTempDirectory("test-avatars");
+        tempAdImageDir = Files.createTempDirectory("test-ads-images");
+        // Удаление при завершении JVM
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                if (tempAvatarDir != null) {
+                    Files.walk(tempAvatarDir)
+                         .sorted(Comparator.reverseOrder())
+                         .forEach(path -> {
+                             try { Files.deleteIfExists(path); } catch (IOException ignored) {}
+                         });
+                }
+                if (tempAdImageDir != null) {
+                    Files.walk(tempAdImageDir)
+                         .sorted(Comparator.reverseOrder())
+                         .forEach(path -> {
+                             try { Files.deleteIfExists(path); } catch (IOException ignored) {}
+                         });
+                }
+            } catch (IOException ignored) {}
+        }));
     }
 
     @DynamicPropertySource
@@ -43,8 +75,8 @@ public abstract class AbstractIntegrationTest {
         registry.add("spring.datasource.url", postgres::getJdbcUrl);
         registry.add("spring.datasource.username", postgres::getUsername);
         registry.add("spring.datasource.password", postgres::getPassword);
-        registry.add("app.image.avatar-dir", () -> "./target/test-avatars");
-        registry.add("app.image.ad-dir", () -> "./target/test-ads-images");
+        registry.add("app.image.avatar-dir", tempAvatarDir::toString);
+        registry.add("app.image.ad-dir", tempAdImageDir::toString);
         registry.add("spring.datasource.hikari.connection-timeout", () -> "60000");
         registry.add("spring.datasource.hikari.validation-timeout", () -> "60000");
     }
@@ -63,7 +95,6 @@ public abstract class AbstractIntegrationTest {
         return restTemplate.withBasicAuth(username, password);
     }
 
-    // Для PATCH-запросов с телом (не multipart)
     protected <T> ResponseEntity<T> patchWithAuth(
             String url,
             Object request,
@@ -77,7 +108,6 @@ public abstract class AbstractIntegrationTest {
         return restTemplate.exchange(url, HttpMethod.PATCH, entity, responseType, uriVariables);
     }
 
-    // Для multipart PATCH-запросов (например, обновление изображения)
     protected <T> ResponseEntity<T> patchMultipartWithAuth(
             String url,
             MultiValueMap<String, Object> body,
@@ -92,13 +122,32 @@ public abstract class AbstractIntegrationTest {
         return restTemplate.exchange(url, HttpMethod.PATCH, entity, responseType, uriVariables);
     }
 
-    // Создание директорий для изображений (вызывать в setUp() наследников)
-    protected void createImageDirectories() {
-        try {
-            Files.createDirectories(Paths.get("./target/test-avatars"));
-            Files.createDirectories(Paths.get("./target/test-ads-images"));
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to create test image directories", e);
+    @BeforeEach
+    void cleanImageDirectories() throws IOException {
+        cleanDirectory(tempAvatarDir);
+        cleanDirectory(tempAdImageDir);
+    }
+
+    private void cleanDirectory(Path dir) throws IOException {
+        if (Files.exists(dir)) {
+            Files.walk(dir)
+                 .sorted(Comparator.reverseOrder())
+                 .forEach(path -> {
+                     try {
+                         Files.deleteIfExists(path);
+                     } catch (IOException e) {
+                         // ignore
+                     }
+                 });
         }
+        Files.createDirectories(dir);
+    }
+
+    protected Path getAvatarDir() {
+        return tempAvatarDir;
+    }
+
+    protected Path getAdImageDir() {
+        return tempAdImageDir;
     }
 }
