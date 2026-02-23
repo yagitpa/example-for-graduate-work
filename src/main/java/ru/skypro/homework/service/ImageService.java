@@ -3,6 +3,7 @@ package ru.skypro.homework.service;
 import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -11,8 +12,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import ru.skypro.homework.constants.ExceptionMessages;
+import ru.skypro.homework.constants.ValidationConstants;
 import ru.skypro.homework.exception.ImageNotFoundException;
 import ru.skypro.homework.exception.ImageReadException;
+import ru.skypro.homework.exception.ImageSaveException;
+import ru.skypro.homework.exception.InvalidImageException;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -30,6 +34,7 @@ import javax.annotation.PostConstruct;
  * ImageNotFoundException}.
  */
 @Getter
+@Setter
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -64,6 +69,7 @@ public class ImageService {
      * @return относительный путь к файлу (например, "/avatars/file.jpg")
      */
     public String saveImage(MultipartFile image, String directory, String urlPrefix) {
+        validateImage(image);
         try {
             String extension = getExtension(image.getOriginalFilename());
             String filename = UUID.randomUUID() + extension;
@@ -76,7 +82,7 @@ public class ImageService {
             return urlPrefix + filename;
         } catch (IOException e) {
             log.error("Failed to save image to {}", directory, e);
-            throw new RuntimeException(ExceptionMessages.IMAGE_FAILED_TO_SAVE, e);
+            throw new ImageSaveException(ExceptionMessages.IMAGE_FAILED_TO_SAVE, e);
         }
     }
 
@@ -158,6 +164,24 @@ public class ImageService {
             } catch (IOException e) {
                 log.error("Failed to create directory: {}", path.toAbsolutePath(), e);
             }
+        }
+    }
+
+    /**
+     * Валидация входящих изображений: пустой файл, неподдерживаемый тип файла и превышение разрешенного размера файла
+     *
+     * @param image
+     */
+    private void validateImage(MultipartFile image) {
+        if (image == null || image.isEmpty()) {
+            throw new InvalidImageException(ExceptionMessages.INVALID_IMAGE_FILE);
+        }
+        String contentType = image.getContentType();
+        if (contentType == null || !ValidationConstants.ALLOWED_CONTENT_TYPES.contains(contentType)) {
+            throw new InvalidImageException(String.format(ExceptionMessages.INVALID_IMAGE_TYPE, contentType));
+        }
+        if (image.getSize() > ValidationConstants.MAX_FILE_SIZE) {
+            throw new InvalidImageException(ExceptionMessages.INVALID_IMAGE_SIZE);
         }
     }
 
