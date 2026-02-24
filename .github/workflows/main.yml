@@ -12,8 +12,22 @@ jobs:
 
     env:
       TESTCONTAINERS_RYUK_DISABLED: true
-      DOCKER_CLIENT_VERSION: 1.44
       CI: true
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: 12345
+          POSTGRES_DB: ads_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout code
@@ -36,8 +50,8 @@ jobs:
           name: surefire-reports
           path: target/surefire-reports/
 
-      - name: Docker container logs (if failed)
-        if: failure()
+      - name: Docker container logs (always, for debug)
+        if: always()
         run: |
           docker ps -a
-          docker logs $(docker ps -a -q --filter "ancestor=postgres:15") || echo "No postgres container found"
+          docker logs $(docker ps -a -q --filter "ancestor=postgres:15-alpine") || echo "No postgres container found"
