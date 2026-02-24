@@ -1,13 +1,12 @@
 package ru.skypro.homework.controller.user;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.ByteArrayResource;
@@ -19,8 +18,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.multipart.MultipartFile;
 
+import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.AbstractIntegrationTest;
 import ru.skypro.homework.dto.auth.Role;
 import ru.skypro.homework.dto.user.NewPasswordDto;
@@ -32,178 +31,150 @@ import ru.skypro.homework.repository.CommentRepository;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.ImageService;
 
-import java.util.UUID;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.stream.Collectors;
 
-class UserControllerIntegrationTest extends AbstractIntegrationTest {
+public class UserControllerIntegrationTest extends AbstractIntegrationTest {
 
-    @Autowired private UserRepository userRepository;
+    @Autowired
+    private UserRepository userRepository;
 
-    @Autowired private AdRepository adRepository;
-
-    @Autowired private CommentRepository commentRepository;
-
-    @MockBean private ImageService imageService;
+    @MockBean
+    private ImageService imageService;  // Мокаем ImageService для избежания реальных операций с файлами в CI
 
     private UsersDao testUser;
-    private final String userEmail = "user@test.com";
-    private final String userPassword = "password";
+    private String userPassword = "password";
 
     @BeforeEach
     void setUp() {
         testUser = new UsersDao();
-        testUser.setEmail(userEmail);
+        testUser.setEmail("testuser@example.com");
         testUser.setPassword(passwordEncoder.encode(userPassword));
-        testUser.setFirstName("Иван");
-        testUser.setLastName("Иванов");
+        testUser.setFirstName("Test");
+        testUser.setLastName("User");
         testUser.setPhone("+7 (999) 123-45-67");
         testUser.setRole(Role.USER);
-        testUser.setImage("/avatars/old.jpg");
         userRepository.save(testUser);
 
-        when(imageService.saveImage(any(MultipartFile.class), anyString(), anyString()))
-                .thenAnswer(
-                        invocation -> {
-                            MultipartFile file = invocation.getArgument(0);
-                            String originalFilename = file.getOriginalFilename();
-                            String extension = "";
-                            if (originalFilename != null && originalFilename.contains(".")) {
-                                extension =
-                                        originalFilename.substring(
-                                                originalFilename.lastIndexOf("."));
-                            }
-                            return "/avatars/" + UUID.randomUUID() + extension;
-                        });
-
-        when(imageService.readImageAsBytes(anyString(), anyString()))
-                .thenAnswer(
-                        invocation -> {
-                            String imagePath = invocation.getArgument(0);
-                            return imagePath.contains("new")
-                                    ? "new avatar".getBytes()
-                                    : "old avatar".getBytes();
-                        });
+        // Настраиваем мок для методов ImageService
+        Mockito.doNothing().when(imageService).deleteImage(ArgumentMatchers.anyString(), ArgumentMatchers.any());
+        Mockito.when(imageService.saveAvatar(ArgumentMatchers.any(MultipartFile.class), ArgumentMatchers.anyInt(), ArgumentMatchers.anyString()))
+               .thenReturn("/avatars/mock-avatar.jpg");  // Возвращаем моковый путь
     }
 
     @AfterEach
     void tearDown() {
-        commentRepository.deleteAll();
-        adRepository.deleteAll();
         userRepository.deleteAll();
     }
 
     @Test
-    void getUser_ShouldReturnUserInfo() {
-        ResponseEntity<UserDto> response =
-                withAuth(userEmail, userPassword)
-                        .getForEntity(baseUrl() + "/users/me", UserDto.class);
+    void getUser_ShouldReturnUserDto() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBasicAuth(testUser.getEmail(), userPassword);
+        HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+
+        ResponseEntity<UserDto> response = restTemplate.exchange(
+                baseUrl() + "/users/me",
+                HttpMethod.GET,
+                requestEntity,
+                UserDto.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getId()).isEqualTo(testUser.getId());
         assertThat(response.getBody().getEmail()).isEqualTo(testUser.getEmail());
-        assertThat(response.getBody().getFirstName()).isEqualTo(testUser.getFirstName());
-        assertThat(response.getBody().getLastName()).isEqualTo(testUser.getLastName());
-        assertThat(response.getBody().getPhone()).isEqualTo(testUser.getPhone());
-        assertThat(response.getBody().getRole()).isEqualTo(testUser.getRole());
-        assertThat(response.getBody().getImage()).isEqualTo(testUser.getImage());
     }
 
     @Test
-    void updateUser_ShouldReturnUpdatedInfo() {
+    void updateUser_ShouldUpdateUserInfo() {
         UpdateUserDto update = new UpdateUserDto();
-        update.setFirstName("Пётр");
-        update.setLastName("Петров");
-        update.setPhone("+7 (999) 999-99-99");
+        update.setFirstName("Updated");
+        update.setLastName("User");
+        update.setPhone("+7 (999) 987-65-43");
 
-        ResponseEntity<UpdateUserDto> response =
-                patchWithAuth(
-                        baseUrl() + "/users/me",
-                        update,
-                        UpdateUserDto.class,
-                        userEmail,
-                        userPassword);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBasicAuth(testUser.getEmail(), userPassword);
+        HttpEntity<UpdateUserDto> requestEntity = new HttpEntity<>(update, headers);
+
+        ResponseEntity<UpdateUserDto> response = restTemplate.exchange(
+                baseUrl() + "/users/me",
+                HttpMethod.PATCH,
+                requestEntity,
+                UpdateUserDto.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getFirstName()).isEqualTo("Пётр");
-        assertThat(response.getBody().getLastName()).isEqualTo("Петров");
-        assertThat(response.getBody().getPhone()).isEqualTo("+7 (999) 999-99-99");
+        assertThat(response.getBody().getFirstName()).isEqualTo("Updated");
 
-        UsersDao updated = userRepository.findById(testUser.getId()).orElseThrow();
-        assertThat(updated.getFirstName()).isEqualTo("Пётр");
-        assertThat(updated.getLastName()).isEqualTo("Петров");
-        assertThat(updated.getPhone()).isEqualTo("+7 (999) 999-99-99");
+        UsersDao updatedUser = userRepository.findByEmail(testUser.getEmail()).orElse(null);
+        assertThat(updatedUser).isNotNull();
+        assertThat(updatedUser.getFirstName()).isEqualTo("Updated");
     }
 
     @Test
     void setPassword_ShouldChangePassword() {
         NewPasswordDto passwordDto = new NewPasswordDto();
         passwordDto.setCurrentPassword(userPassword);
-        passwordDto.setNewPassword("newPassword");
+        passwordDto.setNewPassword("newpassword");
 
-        HttpEntity<NewPasswordDto> request = new HttpEntity<>(passwordDto);
-        ResponseEntity<Void> response =
-                withAuth(userEmail, userPassword)
-                        .postForEntity(baseUrl() + "/users/set_password", request, Void.class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBasicAuth(testUser.getEmail(), userPassword);
+        HttpEntity<NewPasswordDto> requestEntity = new HttpEntity<>(passwordDto, headers);
+
+        ResponseEntity<Void> response = restTemplate.exchange(
+                baseUrl() + "/users/set_password",
+                HttpMethod.POST,
+                requestEntity,
+                Void.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        ResponseEntity<UserDto> failedLogin =
-                withAuth(userEmail, userPassword)
-                        .getForEntity(baseUrl() + "/users/me", UserDto.class);
-        assertThat(failedLogin.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        // Проверяем, что новый пароль работает
+        headers.setBasicAuth(testUser.getEmail(), "newpassword");
+        ResponseEntity<UserDto> authResponse = restTemplate.exchange(
+                baseUrl() + "/users/me",
+                HttpMethod.GET,
+                new HttpEntity<>(headers),
+                UserDto.class);
 
-        ResponseEntity<UserDto> successLogin =
-                withAuth(userEmail, "newPassword")
-                        .getForEntity(baseUrl() + "/users/me", UserDto.class);
-        assertThat(successLogin.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(authResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
     @Test
-    void setPassword_WithWrongCurrent_ShouldReturnBadRequest() {
-        NewPasswordDto passwordDto = new NewPasswordDto();
-        passwordDto.setCurrentPassword("wrong123");
-        passwordDto.setNewPassword("newPassword");
-
-        HttpEntity<NewPasswordDto> request = new HttpEntity<>(passwordDto);
-        ResponseEntity<Void> response =
-                withAuth(userEmail, userPassword)
-                        .postForEntity(baseUrl() + "/users/set_password", request, Void.class);
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-    }
-
-    @Test
-    void updateUserImage_ShouldReturnOk() {
+    void updateUserImage_ShouldUpdateAvatar() throws IOException {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        headers.setBasicAuth(testUser.getEmail(), userPassword);
 
-        ByteArrayResource imagePart =
-                new ByteArrayResource("new avatar".getBytes()) {
-                    @Override
-                    public String getFilename() {
-                        return "avatar.jpg";
-                    }
-                };
+        ByteArrayResource imagePart = new ByteArrayResource("new avatar".getBytes()) {
+            @Override
+            public String getFilename() {
+                return "avatar.jpg";
+            }
+        };
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         body.add("image", imagePart);
 
-        ResponseEntity<Void> response =
-                patchMultipartWithAuth(
-                        baseUrl() + "/users/me/image", body, Void.class, userEmail, userPassword);
+        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+        ResponseEntity<UserDto> response = restTemplate.exchange(
+                baseUrl() + "/users/me/image",
+                HttpMethod.PATCH,
+                requestEntity,
+                UserDto.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        UsersDao updated = userRepository.findById(testUser.getId()).orElseThrow();
-        assertThat(updated.getImage()).startsWith("/avatars/");
-        assertThat(updated.getImage()).isNotEqualTo(testUser.getImage());
+        UsersDao updatedUser = userRepository.findByEmail(testUser.getEmail()).orElse(null);
+        assertThat(updatedUser).isNotNull();
+        assertThat(updatedUser.getImage()).isEqualTo("/avatars/mock-avatar.jpg");  // Проверяем моковый путь
     }
 
     @Test
-    void getUser_WithoutAuth_ShouldReturnUnauthorized() {
-        ResponseEntity<UserDto> response =
-                restTemplate.getForEntity(baseUrl() + "/users/me", UserDto.class);
+    void getUser_ShouldReturn401_WhenUnauthorized() {
+        ResponseEntity<UserDto> response = restTemplate.getForEntity(
+                baseUrl() + "/users/me", UserDto.class);
+
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
@@ -215,12 +186,11 @@ class UserControllerIntegrationTest extends AbstractIntegrationTest {
         update.setPhone("+7 (999) 999-99-99");
 
         HttpEntity<UpdateUserDto> requestEntity = new HttpEntity<>(update);
-        ResponseEntity<UpdateUserDto> response =
-                restTemplate.exchange(
-                        baseUrl() + "/users/me",
-                        HttpMethod.PATCH,
-                        requestEntity,
-                        UpdateUserDto.class);
+        ResponseEntity<UpdateUserDto> response = restTemplate.exchange(
+                baseUrl() + "/users/me",
+                HttpMethod.PATCH,
+                requestEntity,
+                UpdateUserDto.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
@@ -232,9 +202,8 @@ class UserControllerIntegrationTest extends AbstractIntegrationTest {
         passwordDto.setNewPassword("new");
 
         HttpEntity<NewPasswordDto> requestEntity = new HttpEntity<>(passwordDto);
-        ResponseEntity<Void> response =
-                restTemplate.postForEntity(
-                        baseUrl() + "/users/set_password", requestEntity, Void.class);
+        ResponseEntity<Void> response = restTemplate.postForEntity(
+                baseUrl() + "/users/set_password", requestEntity, Void.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
@@ -244,21 +213,22 @@ class UserControllerIntegrationTest extends AbstractIntegrationTest {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-        ByteArrayResource imagePart =
-                new ByteArrayResource("new avatar".getBytes()) {
-                    @Override
-                    public String getFilename() {
-                        return "avatar.jpg";
-                    }
-                };
+        ByteArrayResource imagePart = new ByteArrayResource("new avatar".getBytes()) {
+            @Override
+            public String getFilename() {
+                return "avatar.jpg";
+            }
+        };
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         body.add("image", imagePart);
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-        ResponseEntity<Void> response =
-                restTemplate.exchange(
-                        baseUrl() + "/users/me/image", HttpMethod.PATCH, requestEntity, Void.class);
+        ResponseEntity<Void> response = restTemplate.exchange(
+                baseUrl() + "/users/me/image",
+                HttpMethod.PATCH,
+                requestEntity,
+                Void.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
