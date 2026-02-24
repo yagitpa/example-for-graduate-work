@@ -7,6 +7,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;
 import org.springframework.util.LinkedMultiValueMap;
@@ -26,6 +27,7 @@ import ru.skypro.homework.repository.UserRepository;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 class AdControllerIntegrationTest extends AbstractIntegrationTest {
 
@@ -33,6 +35,9 @@ class AdControllerIntegrationTest extends AbstractIntegrationTest {
     @Autowired private AdRepository adRepository;
     @Autowired private CommentRepository commentRepository;
     @Autowired private ObjectMapper objectMapper;
+
+    @Value("${app.image.ad-dir}")
+    private String adImageDir;
 
     private UsersDao testUser;
     private UsersDao adminUser;
@@ -130,8 +135,8 @@ class AdControllerIntegrationTest extends AbstractIntegrationTest {
         assertThat(response.getBody().getAuthor()).isEqualTo(testUser.getId());
 
         String imageUrl = response.getBody().getImage();
-        String filename = Path.of(imageUrl).getFileName().toString();
-        Path savedPath = getAdImageDir().resolve(filename);
+        String filename = Paths.get(imageUrl).getFileName().toString();
+        Path savedPath = Paths.get(adImageDir).resolve(filename);
         assertThat(savedPath).exists();
         assertThat(Files.readAllBytes(savedPath)).isEqualTo(imageContent);
     }
@@ -165,7 +170,7 @@ class AdControllerIntegrationTest extends AbstractIntegrationTest {
         adWithImage.setImage("/ads-images/to-delete.jpg");
         adRepository.save(adWithImage);
 
-        Path imagePath = getAdImageDir().resolve("to-delete.jpg");
+        Path imagePath = Paths.get(adImageDir, "to-delete.jpg");
         Files.write(imagePath, "content".getBytes());
 
         ResponseEntity<Void> response = withAuth(userEmail, userPassword)
@@ -241,7 +246,7 @@ class AdControllerIntegrationTest extends AbstractIntegrationTest {
     @Test
     void updateImage_ShouldReplaceImageAndDeleteOld() throws Exception {
         // Создаём старый файл
-        Path oldImagePath = getAdImageDir().resolve("old.jpg");
+        Path oldImagePath = Paths.get(adImageDir, "old.jpg");
         Files.write(oldImagePath, "old content".getBytes());
         testAd.setImage("/ads-images/old.jpg");
         adRepository.save(testAd);
@@ -278,8 +283,8 @@ class AdControllerIntegrationTest extends AbstractIntegrationTest {
         assertThat(oldImagePath).doesNotExist();
 
         // Новый файл должен существовать
-        String newFilename = Path.of(updated.getImage()).getFileName().toString();
-        Path newImagePath = getAdImageDir().resolve(newFilename);
+        String newFilename = Paths.get(updated.getImage()).getFileName().toString();
+        Path newImagePath = Paths.get(adImageDir, newFilename);
         assertThat(newImagePath).exists();
         assertThat(Files.readAllBytes(newImagePath)).isEqualTo(newContent);
     }
@@ -382,7 +387,7 @@ class AdControllerIntegrationTest extends AbstractIntegrationTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
-    // ====== ТЕСТЫ на 404 ======
+    // ====== ТЕСТЫ на 404 для несуществующего объявления ======
 
     @Test
     void getAd_NotFound_ShouldReturn404() {
@@ -441,7 +446,7 @@ class AdControllerIntegrationTest extends AbstractIntegrationTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
-    // ====== ТЕСТЫ на 403 ======
+    // ====== ТЕСТЫ на 403 (обновление чужого объявления) ======
 
     @Test
     void updateAd_ByOtherUser_ShouldReturnForbidden() {

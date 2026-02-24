@@ -44,8 +44,6 @@ class CommentControllerIntegrationTest extends AbstractIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        // Директории для изображений создаются автоматически в AbstractIntegrationTest
-
         author = new UsersDao();
         author.setEmail("author@test.com");
         author.setPassword(passwordEncoder.encode(authorPassword));
