@@ -48,7 +48,7 @@ src/main/java/ru/skypro/homework/
 2. Создайте базу данных (например, ads_db) в PostgreSQL.
 
 3. Настройте параметры подключения в application.properties (или через переменные окружения):
-    ```java
+    ```properties
     spring.datasource.url=jdbc:postgresql://localhost:5432/ads_db
     spring.datasource.username=postgres
     spring.datasource.password=12345
