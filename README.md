@@ -79,3 +79,7 @@ Swagger UI: `http://localhost:8080/swagger-ui.html`
 - Объявления: `GET /ads`, `POST /ads`, `GET /ads/{id}`, `DELETE /ads/{id}`, `PATCH /ads/{id}`, `GET /ads/me`, `PATCH /ads/{id}/image`
 - Комментарии: `GET /ads/{adId}/comments`, `POST /ads/{adId}/comments`, `DELETE /ads/{adId}/comments/{commentId}`, `PATCH /ads/{adId}/comments/{commentId}`
 - Изображения: `GET /ads-images/{filename}`, `GET /avatars/{filename}`
+
+## UML-диаграмма
+
+![UML](https://s10.iimage.su/s/26/g9qmnhgxThKKmGzav9qzGRuP8FZ5E7kzFzFezM4kd.png)
