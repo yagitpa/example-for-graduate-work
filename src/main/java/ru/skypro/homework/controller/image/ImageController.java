@@ -1,5 +1,6 @@
 package ru.skypro.homework.controller.image;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
@@ -18,6 +19,7 @@ public class ImageController {
 
     private final ImageService imageService;
 
+    @Operation(summary = "Получение картинки объявления")
     @GetMapping("/ads-images/{filename}")
     public ResponseEntity<byte[]> getAdImage(@PathVariable String filename) {
         ImageService.ImageData imageData = imageService.loadAdImage(filename);
@@ -26,6 +28,7 @@ public class ImageController {
                 .body(imageData.getContent());
     }
 
+    @Operation(summary = "Получение аватара пользователя")
     @GetMapping("/avatars/{filename}")
     public ResponseEntity<byte[]> getAvatar(@PathVariable String filename) {
         ImageService.ImageData imageData = imageService.loadAvatar(filename);

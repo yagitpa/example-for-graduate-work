@@ -15,6 +15,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import org.springframework.web.servlet.NoHandlerFoundException;
 import ru.skypro.homework.exception.AdNotFoundException;
 import ru.skypro.homework.exception.CommentNotFoundException;
 import ru.skypro.homework.exception.ImageNotFoundException;
@@ -102,6 +103,17 @@ public class GlobalExceptionHandler {
         return buildValidationErrorResponse(violations);
     }
 
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNoHandlerFound(NoHandlerFoundException e) {
+        log.error("No handler found for request: {} {}", e.getHttpMethod(), e.getRequestURL());
+        ErrorResponse error = new ErrorResponse(
+                Instant.now().toString(),
+                HttpStatus.NOT_FOUND.value(),
+                "Endpoint not found"
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
     private ResponseEntity<ValidationErrorResponse> buildValidationErrorResponse(
             List<Violation> violations) {
         ValidationErrorResponse response =
@@ -113,7 +125,6 @@ public class GlobalExceptionHandler {
         log.error("Validation failed {}", violations);
         return ResponseEntity.badRequest().body(response);
     }
-
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<?> handleAccessDenied(AccessDeniedException e) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -146,16 +157,26 @@ public class GlobalExceptionHandler {
     @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class ValidationErrorResponse {
+
         private String timestamp;
         private int status;
         private String error;
         private List<Violation> violations;
     }
-
     @Data
     @AllArgsConstructor
     public static class Violation {
+
         private String field;
         private String message;
+    }
+
+    @Data
+    @AllArgsConstructor
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class ErrorResponse {
+        private String timestamp;
+        private int status;
+        private String error;
     }
 }
