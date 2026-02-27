@@ -16,7 +16,7 @@ public class OpenApiConfig {
         return new OpenAPI()
                 .info(
                         new Info()
-                                .title("AdsDto Platform API")
+                                .title("Ads Platform API")
                                 .description("API для платформы объявлений")
                                 .version("1.0.0")
                                 .contact(
