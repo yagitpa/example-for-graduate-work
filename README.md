@@ -82,4 +82,4 @@ Swagger UI: `http://localhost:8080/swagger-ui.html`
 
 ## UML-диаграмма
 
-![UML](https://s10.iimage.su/s/26/g9qmnhgxThKKmGzav9qzGRuP8FZ5E7kzFzFezM4kd.png)
+![UML](https://s10.iimage.su/s/27/gSiQBJWxwEhciAl6nnOEBA7IUYZHPSF1n9qy6pl4N.png)
